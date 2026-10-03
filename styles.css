@@ -69,6 +69,11 @@
 
 html, body {
   height: 100%;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -78,6 +83,10 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+img, canvas, svg {
+  max-width: 100%;
 }
 
 /* Utilities */
@@ -115,6 +124,10 @@ body {
 .layout-container {
   display: flex;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  position: relative;
 }
 
 /* Sidebar (Left, 240px wide) */
@@ -133,9 +146,35 @@ body {
   z-index: 40;
 }
 
+.sidebar-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0.25rem 1.25rem 0.25rem;
+}
+
 .brand-logo {
   cursor: pointer;
-  padding: 0.25rem 0.5rem 1.5rem 0.5rem;
+  padding: 0.25rem;
+}
+
+.sidebar-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: #ffffff;
+  padding: 0.4rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+  transition: opacity 0.15s ease;
+}
+
+.sidebar-close-btn:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .logo-text {
@@ -223,6 +262,9 @@ body {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   padding: 1.75rem 2.25rem 3.5rem 2.25rem;
 }
 
@@ -479,17 +521,23 @@ body {
   padding: 0 1.25rem 0.5rem 1.25rem;
   height: 220px;
   position: relative;
+  width: 100%;
 }
 
-#profitTrendCanvas {
-  width: 100%;
-  height: 100%;
+#profitTrendCanvas,
+#monthlyProfitCanvas,
+#cashTrendCanvas,
+#cashInVsOutCanvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
   display: block;
 }
 
 /* Donut Card Layout */
 .donut-card {
   padding: 0 0 1.25rem 0;
+  overflow: hidden;
 }
 
 .donut-content-layout {
@@ -508,6 +556,13 @@ body {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+#expenseDonutCanvas {
+  width: 170px !important;
+  height: 170px !important;
+  max-width: 100% !important;
+  display: block;
 }
 
 .donut-center-label {
@@ -1531,89 +1586,7 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
 }
 
-/* =====================================================================
-   RESPONSIVE BREAKPOINTS
-   ===================================================================== */
-@media (max-width: 1200px) {
-  .calc-cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .summary-bar-main {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 
-@media (max-width: 1024px) {
-  .kpi-grid,
-  .expenses-summary-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .dashboard-charts-grid,
-  .dashboard-bottom-grid,
-  .reports-grid,
-  .settings-layout-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 880px) {
-  .app-sidebar {
-    position: fixed;
-    left: -260px;
-    transition: left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .app-sidebar.open {
-    left: 0;
-  }
-
-  .sidebar-backdrop.active {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.45);
-    z-index: 35;
-  }
-
-  .mobile-menu-btn {
-    display: block;
-  }
-
-  .main-wrapper {
-    padding: 1.25rem 1rem 6rem 1rem;
-  }
-
-  .mobile-bottom-nav {
-    display: flex;
-  }
-
-  .calc-cards-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 600px) {
-  .top-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .header-right {
-    width: 100%;
-    justify-content: space-between;
-  }
-  .kpi-grid {
-    grid-template-columns: 1fr;
-  }
-  .summary-bar-main {
-    grid-template-columns: 1fr;
-  }
-  .donut-content-layout {
-    flex-direction: column;
-  }
-}
 
 /* =====================================================================
    CASH FLOW MANAGEMENT SYSTEM STYLES
@@ -2082,8 +2055,18 @@ body {
   color: var(--coral-badge-text);
 }
 
-/* Responsive adjustments for Cash Flow */
-@media (max-width: 1100px) {
+/* =====================================================================
+   RESPONSIVE DESIGN SYSTEM (Desktop • Tablet • Mobile)
+   ===================================================================== */
+
+/* --- 1. Large Laptops / Medium Desktops (< 1200px) --- */
+@media (max-width: 1200px) {
+  .calc-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .summary-bar-main {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .cf-kpi-grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -2093,19 +2076,340 @@ body {
   }
 }
 
-@media (max-width: 768px) {
-  .cf-kpi-grid {
+/* --- 2. Small Laptops / Tablets (< 1024px) --- */
+@media (max-width: 1024px) {
+  .kpi-grid,
+  .expenses-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dashboard-charts-grid,
+  .dashboard-bottom-grid,
+  .reports-grid,
+  .settings-layout-grid {
     grid-template-columns: 1fr;
   }
-  .cf-alert-card {
-    flex-direction: column;
-    align-items: flex-start;
+  .main-wrapper {
+    padding: 1.5rem 1.5rem 4.5rem 1.5rem;
   }
-  .cf-runway-box, .cf-buffer-box {
-    border-left: none;
-    padding-left: 0;
-    border-top: 1px solid var(--border-card);
-    padding-top: 0.75rem;
-    width: 100%;
+}
+
+/* --- 3. Mobile Devices & Small Tablets (< 880px) --- */
+@media (max-width: 880px) {
+  /* Prevent horizontal scroll / zoom blowout */
+  html, body {
+    overflow-x: hidden !important;
+    position: relative;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+
+  .layout-container {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    display: block !important;
+  }
+
+  /* Off-canvas Navigation Drawer */
+  .app-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 280px !important;
+    max-width: 85vw !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    z-index: 1000 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: none !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+  }
+
+  .app-sidebar.open {
+    transform: translateX(0) !important;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.55) !important;
+  }
+
+  .sidebar-close-btn {
+    display: flex !important;
+  }
+
+  .sidebar-backdrop {
+    display: block !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.55) !important;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 999 !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease !important;
+  }
+
+  .sidebar-backdrop.active {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  /* Hamburger Toggle */
+  .mobile-menu-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-dark);
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* Main Viewport Content */
+  .main-wrapper {
+    padding: 1rem 0.85rem calc(5.75rem + env(safe-area-inset-bottom, 0px)) 0.85rem !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Mobile Bottom Navigation Bar */
+  .mobile-bottom-nav {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    border-top: 1px solid #e5e0d8 !important;
+    padding: 0.4rem 0.35rem calc(0.45rem + env(safe-area-inset-bottom, 0px)) 0.35rem !important;
+    z-index: 500 !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .mobile-nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    font-size: 0.65rem;
+    padding: 0.2rem 0;
+    min-width: 0;
+    color: var(--text-muted);
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+
+  .mobile-nav-btn.active {
+    color: var(--text-dark);
+    font-weight: 700;
+  }
+
+  .mobile-nav-btn span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .mobile-nav-btn.add-btn {
+    margin-top: -16px;
+    flex: 0 0 54px;
+  }
+
+  .mobile-add-circle {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Anti-Zoom on iOS: inputs MUST have font-size >= 16px */
+  input,
+  select,
+  textarea,
+  .input-text,
+  .input-num,
+  .input-buffer,
+  .currency-select,
+  .report-range-select {
+    font-size: 16px !important;
+  }
+
+  /* Grids Collapse to Single Column on Mobile */
+  .kpi-grid,
+  .cf-kpi-grid,
+  .calc-cards-grid,
+  .expenses-summary-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  /* Donut Card Layout */
+  .donut-content-layout {
+    flex-direction: column !important;
+    padding: 1rem 0.75rem !important;
+    gap: 1.25rem !important;
+  }
+
+  .donut-chart-wrapper {
+    margin: 0 auto !important;
+    width: 170px !important;
+    height: 170px !important;
+    max-width: 100% !important;
+  }
+
+  #expenseDonutCanvas {
+    width: 170px !important;
+    height: 170px !important;
+    max-width: 100% !important;
+    display: block !important;
+  }
+
+  .donut-legend {
+    width: 100% !important;
+  }
+
+  /* Cash Flow Responsive Items */
+  .cf-alert-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+    padding: 1rem 1.15rem !important;
+  }
+
+  .cf-runway-box,
+  .cf-buffer-box {
+    border-left: none !important;
+    border-top: 1px solid var(--border-card) !important;
+    padding-left: 0 !important;
+    padding-top: 0.75rem !important;
+    width: 100% !important;
+  }
+
+  .profit-vs-cash-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+
+  .pvc-separator {
+    display: none !important;
+  }
+
+  .pvc-variance {
+    width: 100% !important;
+  }
+
+  .forecast-inputs-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  /* Calculator View */
+  .summary-bar-main {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .calc-breakdown-bar-area {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .breakdown-bar-row {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Header Clean Mobile Wrap */
+  .top-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.85rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .header-left {
+    width: 100% !important;
+  }
+
+  .header-greeting {
+    font-size: 1.35rem !important;
+  }
+
+  .header-right {
+    width: 100% !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+    gap: 0.45rem !important;
+  }
+
+  .cashflow-view-header,
+  .records-view-header,
+  .products-view-header,
+  .reports-view-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+  }
+
+  .cashflow-header-actions,
+  .records-header-actions,
+  .reports-header-actions {
+    width: 100% !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  .cf-period-pills {
+    overflow-x: auto !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Modals Mobile Centering & Responsive Bounds */
+  .modal-dialog {
+    width: calc(100vw - 1.5rem) !important;
+    max-width: 440px !important;
+    margin: 1rem auto !important;
+    max-height: 88vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+/* --- 4. Extra Small Phones (< 480px) --- */
+@media (max-width: 480px) {
+  .summary-bar-main {
+    grid-template-columns: 1fr !important;
+  }
+  .cf-kpi-card {
+    padding: 0.9rem 1rem !important;
+  }
+  .card-head {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+  }
+  .chart-time-tabs {
+    width: 100% !important;
+    justify-content: space-between !important;
   }
 }
