@@ -836,30 +836,75 @@
     if (!tbody) return;
     tbody.innerHTML = '';
 
+    const searchInput = document.getElementById('productSearchInput');
+    const query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+
+    const filtered = products.filter((p) => {
+      if (!query) return true;
+      return (p.name || '').toLowerCase().includes(query) || (p.category || '').toLowerCase().includes(query);
+    });
+
+    const countBadge = document.getElementById('productCountBadge');
+    if (countBadge) {
+      countBadge.textContent = `${filtered.length} Product${filtered.length === 1 ? '' : 's'}`;
+    }
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="text-center text-muted" style="padding: 2.5rem 1rem;">
+            ${query ? `No products matching "${escapeHtml(query)}"` : 'No products added yet. Click <strong>+ Add Product</strong> or <strong>Bulk Add</strong> to add your SKUs.'}
+          </td>
+        </tr>
+      `;
+      document.getElementById('productsTotalRevenue').textContent = formatMoney(0);
+      document.getElementById('productsTotalCogs').textContent = formatMoney(0);
+      document.getElementById('productsTotalAds').textContent = formatMoney(0);
+      document.getElementById('productsTotalProfit').textContent = formatMoney(0);
+      document.getElementById('productsTotalMargin').textContent = '0.0%';
+      return;
+    }
+
     let totRev = 0;
     let totCogs = 0;
     let totAds = 0;
     let totProfit = 0;
 
-    products.forEach((p) => {
-      totRev += p.revenue;
-      totCogs += p.cogs;
-      totAds += p.ads;
-      totProfit += p.profit;
+    filtered.forEach((p) => {
+      totRev += p.revenue || 0;
+      totCogs += p.cogs || 0;
+      totAds += p.ads || 0;
+      totProfit += p.profit || 0;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
           <div class="product-item-cell">
             <div class="product-thumb">${p.icon || '📦'}</div>
-            <span class="product-name-txt">${p.name}</span>
+            <span class="product-name-txt">${escapeHtml(p.name)}</span>
           </div>
         </td>
         <td class="text-right font-mono font-bold">${formatMoney(p.revenue)}</td>
         <td class="text-right font-mono text-muted">${formatMoney(p.cogs)}</td>
         <td class="text-right font-mono text-muted">${formatMoney(p.ads)}</td>
-        <td class="text-right font-mono font-bold text-mint">${formatMoney(p.profit)}</td>
+        <td class="text-right font-mono font-bold ${p.profit >= 0 ? 'text-mint' : 'text-coral'}">${formatMoney(p.profit)}</td>
         <td class="text-right font-mono">${formatPercent(p.margin)}</td>
+        <td class="text-center">
+          <div class="row-actions-group">
+            <button type="button" class="btn-row-action" title="Edit Product" onclick="app.openProductModal('${p.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+            <button type="button" class="btn-row-action delete-action" title="Delete Product" onclick="app.deleteProduct('${p.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        </td>
       `;
       tbody.appendChild(tr);
     });
@@ -1188,28 +1233,455 @@
     showToast('Offline MVP mode active. Multi-user accounts will connect to Supabase!', 'info');
   }
 
+  // =====================================================================
+  // PRODUCT MANAGEMENT & BULK IMPORT SYSTEM
+  // =====================================================================
+
+  let editingProductId = null;
+  let bulkParsedProducts = [];
+  let activeBulkTab = 'paste';
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function cleanNumericInput(val) {
+    if (typeof val === 'number') return isNaN(val) ? 0 : val;
+    if (!val) return 0;
+    const cleaned = String(val).replace(/[^0-9.-]/g, '');
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? 0 : num;
+  }
+
+  function guessProductIcon(name, category) {
+    const text = (String(name) + ' ' + String(category)).toLowerCase();
+    if (/shoe|sneaker|boot|footwear|sandal|heel|loafer/.test(text)) return '👟';
+    if (/shirt|t-shirt|hoodie|pant|jean|jacket|dress|apparel|cloth|suit|top/.test(text)) return '👕';
+    if (/watch|clock|strap/.test(text)) return '⌚';
+    if (/ring|necklace|earring|jewel|bracelet|gold|silver/.test(text)) return '💍';
+    if (/phone|audio|earbud|headphone|gadget|charger|cable|tech|laptop|screen|mouse/.test(text)) return '📱';
+    if (/cream|serum|skincare|lotion|perfume|fragrance|shampoo|beauty|cosmetic|oil/.test(text)) return '🧴';
+    if (/sheet|cushion|pillow|bed|duvet|blanket|curtain|decor|home|furniture|towel/.test(text)) return '🏠';
+    if (/bag|wallet|backpack|purse|luggage|leather|briefcase/.test(text)) return '🎒';
+    if (/tea|coffee|drink|juice|snack|food|protein|cookie|honey/.test(text)) return '☕';
+    if (/gym|fitness|yoga|dumbbell|workout|sport|mat|band/.test(text)) return '🏋️';
+    return '📦';
+  }
+
+  // --- MANUAL ADD / EDIT PRODUCT MODAL ---
+  function openProductModal(id = null) {
+    editingProductId = id;
+    const titleEl = document.getElementById('productModalTitle');
+    const editIdInput = document.getElementById('editProductId');
+    const nameInput = document.getElementById('prodNameInput');
+    const catSelect = document.getElementById('prodCategorySelect');
+    const revInput = document.getElementById('prodRevenueInput');
+    const cogsInput = document.getElementById('prodCogsInput');
+    const adsInput = document.getElementById('prodAdsInput');
+
+    // Update currency prefixes in modal
+    document.querySelectorAll('#productModal .currency-symbol-label').forEach((el) => {
+      el.textContent = currency.symbol + ' ';
+    });
+
+    if (id) {
+      const prod = products.find((p) => p.id === id);
+      if (!prod) return;
+      if (titleEl) titleEl.textContent = 'Edit Product';
+      if (editIdInput) editIdInput.value = prod.id;
+      if (nameInput) nameInput.value = prod.name || '';
+      if (catSelect) {
+        const opt = Array.from(catSelect.options).find(o => o.value.includes(prod.category || ''));
+        if (opt) catSelect.value = opt.value;
+      }
+      if (revInput) revInput.value = prod.revenue || '';
+      if (cogsInput) cogsInput.value = prod.cogs || '';
+      if (adsInput) adsInput.value = prod.ads || '';
+    } else {
+      if (titleEl) titleEl.textContent = 'Add New Product';
+      if (editIdInput) editIdInput.value = '';
+      if (nameInput) nameInput.value = '';
+      if (catSelect) catSelect.selectedIndex = 0;
+      if (revInput) revInput.value = '';
+      if (cogsInput) cogsInput.value = '';
+      if (adsInput) adsInput.value = '';
+    }
+
+    updateProdLivePreview();
+    openModal('productModal');
+    if (nameInput) nameInput.focus();
+  }
+
   function showAddProductModal() {
-    const name = prompt('Enter Product Name:');
-    if (!name) return;
-    const rev = Number(prompt('Estimated Daily Revenue (Numbers only):', '50000')) || 0;
-    const cogs = Number(prompt('Product COGS:', '20000')) || 0;
-    const ads = Number(prompt('Ad Spend for this product:', '12000')) || 0;
+    openProductModal();
+  }
+
+  function updateProdLivePreview() {
+    const rev = Number(document.getElementById('prodRevenueInput')?.value) || 0;
+    const cogs = Number(document.getElementById('prodCogsInput')?.value) || 0;
+    const ads = Number(document.getElementById('prodAdsInput')?.value) || 0;
     const profit = rev - cogs - ads;
     const margin = rev > 0 ? (profit / rev) * 100 : 0;
 
-    products.push({
-      id: 'p_' + Date.now(),
-      name,
-      icon: '✨',
-      revenue: rev,
-      cogs,
-      ads,
-      profit,
-      margin
-    });
+    const profitEl = document.getElementById('prodPreviewProfit');
+    const marginEl = document.getElementById('prodPreviewMargin');
+
+    if (profitEl) {
+      profitEl.textContent = formatMoney(profit);
+      profitEl.className = `pvc-val font-mono ${profit >= 0 ? 'text-mint' : 'text-coral'}`;
+    }
+    if (marginEl) {
+      marginEl.textContent = formatPercent(margin);
+      marginEl.className = `pvc-val font-mono ${margin >= 0 ? 'text-mint' : 'text-coral'}`;
+    }
+  }
+
+  function handleProductSubmit(e) {
+    if (e) e.preventDefault();
+    const id = document.getElementById('editProductId')?.value;
+    const name = (document.getElementById('prodNameInput')?.value || '').trim();
+    if (!name) {
+      showToast('Please enter a product name', 'warning');
+      return;
+    }
+
+    const catVal = document.getElementById('prodCategorySelect')?.value || '📦 General';
+    const catParts = catVal.split(' ');
+    const icon = catParts[0] || '📦';
+    const category = catParts.slice(1).join(' ') || 'General';
+
+    const revenue = Number(document.getElementById('prodRevenueInput')?.value) || 0;
+    const cogs = Number(document.getElementById('prodCogsInput')?.value) || 0;
+    const ads = Number(document.getElementById('prodAdsInput')?.value) || 0;
+    const profit = revenue - cogs - ads;
+    const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
+
+    if (id) {
+      const idx = products.findIndex((p) => p.id === id);
+      if (idx !== -1) {
+        products[idx] = {
+          ...products[idx],
+          name,
+          icon: icon || products[idx].icon || '📦',
+          category,
+          revenue,
+          cogs,
+          ads,
+          profit,
+          margin
+        };
+        showToast(`Updated product "${name}"`, 'success');
+      }
+    } else {
+      products.push({
+        id: 'p_' + Date.now(),
+        name,
+        icon: icon || guessProductIcon(name, category),
+        category,
+        revenue,
+        cogs,
+        ads,
+        profit,
+        margin
+      });
+      showToast(`Added product "${name}"`, 'success');
+    }
+
     saveData();
     renderProductsView();
-    showToast(`Added product "${name}"!`, 'success');
+    closeModal('productModal');
+  }
+
+  function deleteProduct(id) {
+    const prod = products.find((p) => p.id === id);
+    if (!prod) return;
+    if (confirm(`Are you sure you want to delete "${prod.name}"?`)) {
+      products = products.filter((p) => p.id !== id);
+      saveData();
+      renderProductsView();
+      showToast(`Deleted "${prod.name}"`, 'info');
+    }
+  }
+
+  function filterProductsList() {
+    renderProductsView();
+  }
+
+  // --- EXPORT PRODUCTS CSV ---
+  function exportProductsCsv() {
+    if (!products || products.length === 0) {
+      showToast('No products to export', 'warning');
+      return;
+    }
+    const headers = ['Product Name', 'Category', 'Revenue', 'COGS', 'Ad Spend', 'Net Profit', 'Margin %'];
+    const rows = products.map((p) => [
+      `"${(p.name || '').replace(/"/g, '""')}"`,
+      `"${(p.category || 'General').replace(/"/g, '""')}"`,
+      p.revenue || 0,
+      p.cogs || 0,
+      p.ads || 0,
+      p.profit || 0,
+      (p.margin || 0).toFixed(1)
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `products_profitability_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    showToast('Exported products to CSV', 'success');
+  }
+
+  // --- BULK PRODUCT ADD MODAL SYSTEM ---
+  function openBulkProductModal() {
+    activeBulkTab = 'paste';
+    bulkParsedProducts = [];
+    const textarea = document.getElementById('bulkPasteTextarea');
+    if (textarea) textarea.value = '';
+    const fileLabel = document.getElementById('fileSelectedName');
+    if (fileLabel) fileLabel.textContent = 'No file selected';
+    const fileInput = document.getElementById('csvFileInput');
+    if (fileInput) fileInput.value = '';
+
+    switchBulkTab('paste');
+    initMultiRowsDefault();
+    parseBulkInput();
+    openModal('bulkProductModal');
+  }
+
+  function switchBulkTab(tabName) {
+    activeBulkTab = tabName;
+    document.querySelectorAll('.bulk-tab-btn').forEach((b) => b.classList.remove('active'));
+    document.querySelectorAll('.bulk-tab-content').forEach((c) => c.classList.remove('active'));
+
+    const btn = document.getElementById(`tabBtn${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+    const content = document.getElementById(`bulkTab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+    if (btn) btn.classList.add('active');
+    if (content) content.classList.add('active');
+
+    parseBulkInput();
+  }
+
+  function loadSampleBulkData() {
+    const textarea = document.getElementById('bulkPasteTextarea');
+    if (!textarea) return;
+    textarea.value = [
+      'Wireless Noise-Cancelling Earbuds, 180000, 60000, 35000',
+      'Premium Leather Minimalist Wallet, 95000, 28000, 18000',
+      'Smart Fitness & Health Tracker Watch, 320000, 110000, 65000',
+      'Egyptian Cotton Bed Sheet Set, 140000, 50000, 28000',
+      'Organic Vitamin C Face Serum, 85000, 22000, 16000',
+      'Stainless Steel Insulated Travel Tumbler, 62000, 19000, 11000'
+    ].join('\n');
+    parseBulkInput();
+    showToast('Loaded 6 sample products', 'info');
+  }
+
+  function downloadProductTemplateCsv() {
+    const sample = [
+      'Product Name,Revenue,COGS,Ad Spend',
+      'Sample T-Shirt,50000,18000,10000',
+      'Sample Running Shoes,120000,45000,25000',
+      'Sample Smart Watch,250000,95000,50000',
+      'Sample Travel Backpack,85000,28000,16000'
+    ].join('\n');
+
+    const blob = new Blob([sample], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'ecommerce_products_bulk_template.csv';
+    link.click();
+    showToast('Downloaded template CSV', 'info');
+  }
+
+  function handleCsvFileUpload(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const fileLabel = document.getElementById('fileSelectedName');
+    if (fileLabel) fileLabel.textContent = `${file.name} (${Math.round(file.size / 1024)} KB)`;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const text = evt.target.result;
+      const textarea = document.getElementById('bulkPasteTextarea');
+      if (textarea) textarea.value = text;
+      switchBulkTab('paste');
+      showToast(`Loaded ${file.name}!`, 'success');
+    };
+    reader.readAsText(file);
+  }
+
+  function initMultiRowsDefault() {
+    const tbody = document.getElementById('multiRowTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    addMultiRowItem('Wireless Earbuds', '120000', '45000', '25000');
+    addMultiRowItem('Leather Wallet', '85000', '26000', '16000');
+    addMultiRowItem('', '', '', '');
+  }
+
+  function addMultiRowItem(name = '', rev = '', cogs = '', ads = '') {
+    const tbody = document.getElementById('multiRowTableBody');
+    if (!tbody) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" class="multi-row-input mr-name" placeholder="Product name" value="${escapeHtml(name)}" oninput="app.parseMultiRows()"></td>
+      <td><input type="number" class="multi-row-input mr-rev" placeholder="Revenue" value="${rev}" min="0" step="any" oninput="app.parseMultiRows()"></td>
+      <td><input type="number" class="multi-row-input mr-cogs" placeholder="COGS" value="${cogs}" min="0" step="any" oninput="app.parseMultiRows()"></td>
+      <td><input type="number" class="multi-row-input mr-ads" placeholder="Ad spend" value="${ads}" min="0" step="any" oninput="app.parseMultiRows()"></td>
+      <td class="text-center">
+        <button type="button" class="btn-row-action delete-action" title="Remove Row" onclick="this.closest('tr').remove(); app.parseMultiRows();">
+          &times;
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  function parseMultiRows() {
+    if (activeBulkTab === 'grid') {
+      parseBulkInput();
+    }
+  }
+
+  function clearMultiRows() {
+    const tbody = document.getElementById('multiRowTableBody');
+    if (tbody) tbody.innerHTML = '';
+    addMultiRowItem();
+    parseBulkInput();
+  }
+
+  function updateBulkSummaryUI(count, profit) {
+    const countPill = document.getElementById('parsedCountPill');
+    const profitPill = document.getElementById('parsedProfitPill');
+    const confirmBtn = document.getElementById('btnConfirmBulkImport');
+
+    if (countPill) countPill.textContent = `${count} Product${count === 1 ? '' : 's'} Ready`;
+    if (profitPill) profitPill.textContent = `Est. Profit: ${formatMoney(profit)}`;
+    if (confirmBtn) {
+      confirmBtn.disabled = count === 0;
+      confirmBtn.textContent = `Import ${count} Product${count === 1 ? '' : 's'}`;
+    }
+  }
+
+  function parseBulkInput() {
+    let rawText = '';
+    if (activeBulkTab === 'grid') {
+      const rows = document.querySelectorAll('#multiRowTableBody tr');
+      const lines = [];
+      rows.forEach((tr) => {
+        const name = tr.querySelector('.mr-name')?.value.trim();
+        const rev = tr.querySelector('.mr-rev')?.value.trim();
+        const cogs = tr.querySelector('.mr-cogs')?.value.trim();
+        const ads = tr.querySelector('.mr-ads')?.value.trim();
+        if (name || rev || cogs || ads) {
+          lines.push(`${name || ''},${rev || '0'},${cogs || '0'},${ads || '0'}`);
+        }
+      });
+      rawText = lines.join('\n');
+    } else {
+      const textarea = document.getElementById('bulkPasteTextarea');
+      rawText = textarea ? textarea.value : '';
+    }
+
+    bulkParsedProducts = [];
+    const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const tbody = document.getElementById('bulkPreviewTableBody');
+    if (!tbody) return;
+
+    if (lines.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Paste text or upload a CSV above to see a preview here.</td></tr>`;
+      updateBulkSummaryUI(0, 0);
+      return;
+    }
+
+    let totProfit = 0;
+    const previewRows = [];
+
+    lines.forEach((line, idx) => {
+      let parts = [];
+      if (line.includes('\t')) parts = line.split('\t');
+      else if (line.includes(';')) parts = line.split(';');
+      else parts = line.split(',');
+
+      parts = parts.map(p => p.trim().replace(/^["']|["']$/g, ''));
+
+      // Skip header if line 0 looks like a header
+      if (idx === 0) {
+        const first = (parts[0] || '').toLowerCase();
+        if (first === 'product' || first === 'product name' || first === 'name' || first === 'sku' || first === 'item') {
+          return;
+        }
+      }
+
+      const name = parts[0] || `Product ${idx + 1}`;
+      const rev = cleanNumericInput(parts[1]);
+      const cogs = cleanNumericInput(parts[2]);
+      const ads = cleanNumericInput(parts[3]);
+
+      const isValid = name.length > 0 && (!isNaN(rev) && rev >= 0);
+      const profit = (rev || 0) - (cogs || 0) - (ads || 0);
+      const margin = rev > 0 ? (profit / rev) * 100 : 0;
+
+      if (isValid) {
+        totProfit += profit;
+        bulkParsedProducts.push({
+          id: 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+          name,
+          icon: guessProductIcon(name, ''),
+          category: 'General',
+          revenue: rev,
+          cogs,
+          ads,
+          profit,
+          margin
+        });
+      }
+
+      previewRows.push(`
+        <tr>
+          <td><strong>${escapeHtml(name)}</strong></td>
+          <td class="text-right font-mono">${formatMoney(rev)}</td>
+          <td class="text-right font-mono text-muted">${formatMoney(cogs)}</td>
+          <td class="text-right font-mono text-muted">${formatMoney(ads)}</td>
+          <td class="text-right font-mono font-bold ${profit >= 0 ? 'text-mint' : 'text-coral'}">${formatMoney(profit)}</td>
+          <td class="text-right font-mono">${formatPercent(margin)}</td>
+          <td class="text-center">${isValid ? '<span class="badge-valid">Ready</span>' : '<span class="badge-invalid">Check</span>'}</td>
+        </tr>
+      `);
+    });
+
+    tbody.innerHTML = previewRows.join('');
+    updateBulkSummaryUI(bulkParsedProducts.length, totProfit);
+  }
+
+  function confirmBulkImport() {
+    if (!bulkParsedProducts || bulkParsedProducts.length === 0) {
+      showToast('No valid products to import', 'warning');
+      return;
+    }
+
+    const mode = document.querySelector('input[name="bulkImportMode"]:checked')?.value || 'append';
+    const count = bulkParsedProducts.length;
+
+    if (mode === 'replace') {
+      products = [...bulkParsedProducts];
+    } else {
+      products = [...products, ...bulkParsedProducts];
+    }
+
+    saveData();
+    renderProductsView();
+    closeModal('bulkProductModal');
+    showToast(`Successfully ${mode === 'replace' ? 'replaced list with' : 'added'} ${count} products!`, 'success');
   }
 
   // --- TOAST NOTIFICATIONS ---
@@ -2239,6 +2711,23 @@
     setChartRange,
     toggleMobileSidebar,
     exportCsv,
+    // Product Management & Bulk methods
+    openProductModal,
+    updateProdLivePreview,
+    handleProductSubmit,
+    deleteProduct,
+    filterProductsList,
+    exportProductsCsv,
+    openBulkProductModal,
+    switchBulkTab,
+    loadSampleBulkData,
+    downloadProductTemplateCsv,
+    handleCsvFileUpload,
+    parseBulkInput,
+    addMultiRowItem,
+    parseMultiRows,
+    clearMultiRows,
+    confirmBulkImport,
     // Cash Flow methods
     openCashModal,
     handleCashTxSubmit,
