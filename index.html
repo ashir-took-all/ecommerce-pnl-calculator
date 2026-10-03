@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple E-commerce P&L Calculator</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-wrapper">
+
+    <!-- Clean Minimalist Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-symbol">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">E-com P&L Calculator</h1>
+          <p class="brand-subtitle">Fast, accurate daily profit calculation</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Currency Selector -->
+        <div class="currency-box">
+          <span class="currency-label">Currency:</span>
+          <select id="currencySelect" class="currency-dropdown" aria-label="Select Currency">
+            <option value="PKR|Rs " selected>PKR (Rs)</option>
+            <option value="USD|$">USD ($)</option>
+            <option value="AED|AED ">AED (AED)</option>
+            <option value="SAR|SAR ">SAR (SAR)</option>
+            <option value="INR|₹">INR (₹)</option>
+            <option value="GBP|£">GBP (£)</option>
+            <option value="EUR|€">EUR (€)</option>
+            <option value="CAD|C$">CAD (C$)</option>
+            <option value="AUD|A$">AUD (A$)</option>
+            <option value="MYR|RM ">MYR (RM)</option>
+            <option value="BDT|৳">BDT (৳)</option>
+            <option value="CUSTOM">+ Custom...</option>
+          </select>
+        </div>
+
+        <button type="button" id="loadDemoBtn" class="btn btn-secondary btn-sm" title="Fill with realistic sample numbers">
+          Load Sample
+        </button>
+        <button type="button" id="clearFormBtn" class="btn btn-outline btn-sm">
+          Clear
+        </button>
+      </div>
+    </header>
+
+    <!-- Main 2-Column Calculator Grid -->
+    <main class="calculator-grid">
+
+      <!-- LEFT COLUMN: The Simple Input Form -->
+      <section class="card form-card">
+        <div class="card-head">
+          <h2 class="card-title">Daily Numbers</h2>
+          <span class="card-tag">Manual Entry</span>
+        </div>
+
+        <form id="pnlForm" class="pnl-inputs-form">
+          <input type="hidden" id="editEntryId" value="">
+
+          <!-- Date & Store Row -->
+          <div class="form-row-2">
+            <div class="field-group">
+              <label for="inputDate" class="field-label">Date</label>
+              <input type="date" id="inputDate" class="input-text" required>
+            </div>
+            <div class="field-group">
+              <label for="inputStore" class="field-label">Store / Channel</label>
+              <input type="text" id="inputStore" class="input-text" placeholder="e.g. Shopify Store, Daraz, TikTok" value="Shopify Store">
+            </div>
+          </div>
+
+          <!-- Section 1: Sales / Revenue -->
+          <div class="form-block">
+            <div class="block-title">
+              <span class="block-num">1</span>
+              <span>Sales & Orders</span>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field-group">
+                <label for="grossSales" class="field-label">Total Daily Sales (Gross) <span class="req">*</span></label>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix">Rs </span>
+                  <input type="number" id="grossSales" class="input-text input-num" step="0.01" min="0" placeholder="0.00" required>
+                </div>
+                <span class="helper-text">Total sales value before deductions</span>
+              </div>
+
+              <div class="field-group">
+                <label for="returnsDiscounts" class="field-label">Returns, Cancelled & Discounts</label>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix">Rs </span>
+                  <input type="number" id="returnsDiscounts" class="input-text input-num" step="0.01" min="0" placeholder="0.00">
+                </div>
+                <span class="helper-text">Discounts given, returned or cancelled order value</span>
+              </div>
+            </div>
+
+            <div class="form-row-2 mt-2">
+              <div class="field-group">
+                <label for="ordersPlaced" class="field-label">Orders Placed</label>
+                <input type="number" id="ordersPlaced" class="input-text" step="1" min="0" placeholder="e.g. 45">
+              </div>
+              <div class="field-group">
+                <label for="ordersDelivered" class="field-label">Orders Delivered (Optional)</label>
+                <input type="number" id="ordersDelivered" class="input-text" step="1" min="0" placeholder="e.g. 40">
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Product & Delivery Costs -->
+          <div class="form-block">
+            <div class="block-title">
+              <span class="block-num">2</span>
+              <span>Product & Delivery Costs</span>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field-group">
+                <label for="productCogs" class="field-label">Product Cost (COGS) <span class="req">*</span></label>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix">Rs </span>
+                  <input type="number" id="productCogs" class="input-text input-num" step="0.01" min="0" placeholder="0.00" required>
+                </div>
+                <span class="helper-text">Cost of goods sold for today's orders</span>
+              </div>
+
+              <div class="field-group">
+                <label for="courierCost" class="field-label">Courier / Delivery Cost <span class="req">*</span></label>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix">Rs </span>
+                  <input type="number" id="courierCost" class="input-text input-num" step="0.01" min="0" placeholder="0.00" required>
+                </div>
+                <span class="helper-text">Trax, Leopards, TCS, PostEx, etc.</span>
+              </div>
+            </div>
+
+            <div class="form-row-2 mt-2">
+              <div class="field-group">
+                <label for="packagingCost" class="field-label">Packaging & Boxes</label>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix">Rs </span>
+                  <input type="number" id="packagingCost" class="input-text input-num" step="0.01" min="0" placeholder="0.00">
+                </div>
+                <span class="helper-text">Flyers, tape, bubble wrap</span>
+              </div>
+
+              <div class="field-group">
+                <label for="returnShippingCost" class="field-label">Return / RTO Delivery Charges</label>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix">Rs </span>
+                  <input type="number" id="returnShippingCost" class="input-text input-num" step="0.01" min="0" placeholder="0.00">
+                </div>
+                <span class="helper-text">Reverse shipping charges on returned parcels</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Ad Spend & Marketing -->
+          <div class="form-block">
+            <div class="block-title">
+              <span class="block-num">3</span>
+              <span>Marketing & Ads</span>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field-group">
+                <label for="adSpend" class="field-label">Total Ad Spend <span class="req">*</span></label>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix">Rs </span>
+                  <input type="number" id="adSpend" class="input-text input-num" step="0.01" min="0" placeholder="0.00" required>
+                </div>
+                <span class="helper-text">Meta, TikTok, Google ads combined</span>
+              </div>
+
+              <div class="field-group">
+                <label for="agencyInfluencer" class="field-label">Agency / Influencer / Creative</label>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix">Rs </span>
+                  <input type="number" id="agencyInfluencer" class="input-text input-num" step="0.01" min="0" placeholder="0.00">
+                </div>
+                <span class="helper-text">Agency fee, creator payment, UGC cost</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: Other Expenses (Optional) -->
+          <div class="form-block">
+            <div class="block-title">
+              <span class="block-num">4</span>
+              <span>Other Operating Expenses (Optional)</span>
+            </div>
+
+            <div class="form-row-2">
+              <div class="field-group">
+                <label for="otherExpenses" class="field-label">Overheads / Salary / Software</label>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix">Rs </span>
+                  <input type="number" id="otherExpenses" class="input-text input-num" step="0.01" min="0" placeholder="0.00">
+                </div>
+                <span class="helper-text">Daily team wages, Shopify fee, tools</span>
+              </div>
+
+              <div class="field-group">
+                <label for="entryNotes" class="field-label">Notes (Optional)</label>
+                <input type="text" id="entryNotes" class="input-text" placeholder="e.g. Scaling Meta ABO, new product launch">
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Action Buttons -->
+          <div class="form-submit-row">
+            <button type="button" id="cancelEditBtn" class="btn btn-outline btn-sm hidden">Cancel Edit</button>
+            <button type="submit" id="saveRecordBtn" class="btn btn-primary btn-md">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span id="saveBtnText">Save Today's Numbers</span>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- RIGHT COLUMN: Instant Live Result & Financial Summary -->
+      <section class="card summary-card">
+        <div class="card-head">
+          <h2 class="card-title">Live P&L Summary</h2>
+          <span class="live-indicator"><span class="live-dot"></span>Instant Result</span>
+        </div>
+
+        <!-- Big Highlight Profit / Loss Badge -->
+        <div class="profit-highlight-card" id="profitHighlightCard">
+          <span class="profit-status-text" id="profitStatusLabel">Calculated Profit</span>
+          <div class="profit-big-val" id="liveNetProfit">Rs 0.00</div>
+          <div class="profit-sub-badge" id="liveProfitMargin">Margin: 0.0%</div>
+        </div>
+
+        <!-- Visual Expense vs Profit Breakdown Bar -->
+        <div class="breakdown-bar-section">
+          <div class="breakdown-bar-header">
+            <span>Where did your sales go?</span>
+            <span id="costsPercentageLabel">0% Costs</span>
+          </div>
+          <div class="stacked-bar-container">
+            <div id="barCogs" class="bar-segment bar-cogs" title="Product COGS" style="width: 0%;"></div>
+            <div id="barDelivery" class="bar-segment bar-delivery" title="Courier & Delivery" style="width: 0%;"></div>
+            <div id="barAds" class="bar-segment bar-ads" title="Ad Spend" style="width: 0%;"></div>
+            <div id="barOther" class="bar-segment bar-other" title="Other Expenses" style="width: 0%;"></div>
+            <div id="barProfit" class="bar-segment bar-profit" title="Net Profit" style="width: 0%;"></div>
+          </div>
+          <div class="bar-legend">
+            <span class="legend-item"><span class="dot dot-cogs"></span> COGS</span>
+            <span class="legend-item"><span class="dot dot-delivery"></span> Courier</span>
+            <span class="legend-item"><span class="dot dot-ads"></span> Ads</span>
+            <span class="legend-item"><span class="dot dot-other"></span> Other</span>
+            <span class="legend-item"><span class="dot dot-profit"></span> Net Profit</span>
+          </div>
+        </div>
+
+        <!-- Key Financial Metrics Grid -->
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <span class="metric-label">Net Sales</span>
+            <strong class="metric-value text-stone" id="liveNetSales">Rs 0.00</strong>
+            <span class="metric-sub" id="liveGrossSub">Gross: Rs 0.00</span>
+          </div>
+
+          <div class="metric-box">
+            <span class="metric-label">Total Costs</span>
+            <strong class="metric-value text-amber" id="liveTotalCosts">Rs 0.00</strong>
+            <span class="metric-sub" id="liveCostsSub">All expenses</span>
+          </div>
+
+          <div class="metric-box">
+            <span class="metric-label">Ad Spend</span>
+            <strong class="metric-value text-coral" id="liveAdSpend">Rs 0.00</strong>
+            <span class="metric-sub" id="liveAdShare">0% of sales</span>
+          </div>
+
+          <div class="metric-box">
+            <span class="metric-label">Blended ROAS</span>
+            <strong class="metric-value text-stone" id="liveRoas">0.00x</strong>
+            <span class="metric-sub">Sales ÷ Ads</span>
+          </div>
+
+          <div class="metric-box">
+            <span class="metric-label">Cost per Order (CPA)</span>
+            <strong class="metric-value text-stone" id="liveCpa">Rs 0.00</strong>
+            <span class="metric-sub">Ad spend ÷ orders</span>
+          </div>
+
+          <div class="metric-box">
+            <span class="metric-label">Delivery Rate</span>
+            <strong class="metric-value text-mint" id="liveDeliveryRate">0.0%</strong>
+            <span class="metric-sub" id="liveDeliveredCount">0 delivered</span>
+          </div>
+        </div>
+
+        <!-- Simple Educational Callout -->
+        <div class="simple-tip-box">
+          <div class="tip-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+          </div>
+          <div class="tip-body">
+            <strong>How your profit is calculated:</strong>
+            <p>Net Profit = (Gross Sales - Returns) - (Product COGS + Courier + Ads + Overheads). Enter your daily numbers on the left, and check your real profit immediately.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- SAVED HISTORY TABLE SECTION (Simple & Clean) -->
+    <section class="card history-section">
+      <div class="history-head">
+        <div>
+          <h2 class="card-title">Saved Daily Records</h2>
+          <p class="history-subtitle">Track your daily progress over time. Edit or delete anytime.</p>
+        </div>
+        <div class="history-actions">
+          <button type="button" id="exportCsvBtn" class="btn btn-secondary btn-sm">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export to CSV
+          </button>
+          <button type="button" id="clearAllHistoryBtn" class="btn btn-outline btn-sm text-red">
+            Reset History
+          </button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="simple-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Store</th>
+              <th class="text-right">Orders</th>
+              <th class="text-right">Net Sales</th>
+              <th class="text-right">Ad Spend</th>
+              <th class="text-right">Product & Courier</th>
+              <th class="text-right">Total Costs</th>
+              <th class="text-right">Net Profit</th>
+              <th class="text-right">Margin</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div> <!-- End App Wrapper -->
+
+  <!-- Custom Currency Modal -->
+  <div id="customCurrencyModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Set Custom Currency</h3>
+        <button type="button" class="modal-close" onclick="app.closeModal('customCurrencyModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-group mb-2">
+          <label for="customCode" class="field-label">Currency Code</label>
+          <input type="text" id="customCode" class="input-text" placeholder="e.g. PKR, MYR, CHF, BRL" maxlength="5">
+        </div>
+        <div class="field-group mt-2">
+          <label for="customSymbol" class="field-label">Currency Symbol / Display Prefix</label>
+          <input type="text" id="customSymbol" class="input-text" placeholder="e.g. Rs, RM, kr, R$" maxlength="6">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline btn-sm" onclick="app.closeModal('customCurrencyModal')">Cancel</button>
+        <button type="button" id="saveCustomCurrencyBtn" class="btn btn-primary btn-sm">Save Currency</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
