@@ -566,12 +566,11 @@
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-
-    canvas.width = rect.width * dpr;
+    const w = rect.width > 0 ? rect.width : (canvas.parentElement ? canvas.parentElement.clientWidth : 320);
+    canvas.width = w * dpr;
     canvas.height = 220 * dpr;
     ctx.scale(dpr, dpr);
 
-    const w = rect.width;
     const h = 220;
 
     ctx.clearRect(0, 0, w, h);
@@ -948,12 +947,11 @@
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-
-    canvas.width = rect.width * dpr;
+    const w = rect.width > 0 ? rect.width : (canvas.parentElement ? canvas.parentElement.clientWidth : 320);
+    canvas.width = w * dpr;
     canvas.height = 240 * dpr;
     ctx.scale(dpr, dpr);
 
-    const w = rect.width;
     const h = 240;
 
     ctx.clearRect(0, 0, w, h);
@@ -1645,12 +1643,11 @@
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-
-    canvas.width = rect.width * dpr;
+    const w = rect.width > 0 ? rect.width : (canvas.parentElement ? canvas.parentElement.clientWidth : 320);
+    canvas.width = w * dpr;
     canvas.height = 220 * dpr;
     ctx.scale(dpr, dpr);
 
-    const w = rect.width;
     const h = 220;
 
     ctx.clearRect(0, 0, w, h);
@@ -1775,12 +1772,11 @@
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-
-    canvas.width = rect.width * dpr;
+    const w = rect.width > 0 ? rect.width : (canvas.parentElement ? canvas.parentElement.clientWidth : 320);
+    canvas.width = w * dpr;
     canvas.height = 220 * dpr;
     ctx.scale(dpr, dpr);
 
-    const w = rect.width;
     const h = 220;
 
     ctx.clearRect(0, 0, w, h);
@@ -2195,6 +2191,35 @@
       } else if (currentView === 'cashflow') {
         renderCashTrendChart();
         renderCashInVsOutChart();
+      }
+    });
+
+    // --- ANTI-ZOOM SAFEGUARDS (Mobile & PC) ---
+    // 1. Prevent accidental Ctrl + Mouse Wheel / Trackpad pinch zoom on PC
+    window.addEventListener('wheel', (e) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    // 2. Prevent Safari gesture zooming (pinch-to-zoom on iOS/macOS Safari)
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach((evt) => {
+      document.addEventListener(evt, (e) => {
+        e.preventDefault();
+      });
+    });
+
+    // 3. Prevent multi-finger pinch zoom on mobile touchscreens
+    document.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches.length > 1) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    // 4. Close mobile sidebar on Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        toggleMobileSidebar(false);
       }
     });
 
