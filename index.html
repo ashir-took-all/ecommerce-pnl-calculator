@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>ecomP&amp;L — E-commerce Profitability Calculator</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,9 +18,18 @@
     <!-- ================================================================= -->
     <aside class="app-sidebar" id="appSidebar">
       <div class="sidebar-top">
-        <!-- Logo -->
-        <div class="brand-logo" onclick="app.switchView('dashboard')">
-          <span class="logo-text">ecom<strong>P&amp;L</strong></span>
+        <div class="sidebar-header-row">
+          <!-- Logo -->
+          <div class="brand-logo" onclick="app.switchView('dashboard')">
+            <span class="logo-text">ecom<strong>P&amp;L</strong></span>
+          </div>
+          <!-- Close button for mobile drawer -->
+          <button type="button" class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close menu" onclick="app.toggleMobileSidebar(false)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
 
         <!-- Main Navigation Links -->
@@ -245,7 +254,7 @@
             </div>
             <div class="donut-content-layout">
               <div class="donut-chart-wrapper">
-                <canvas id="expenseDonutCanvas" width="190" height="190"></canvas>
+                <canvas id="expenseDonutCanvas" width="170" height="170"></canvas>
                 <div class="donut-center-label">
                   <span class="donut-center-sub">Total Expenses</span>
                   <strong class="donut-center-val font-mono" id="donutCenterTotal">Rs 0</strong>
