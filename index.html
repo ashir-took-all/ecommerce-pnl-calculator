@@ -3,371 +3,1314 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple E-commerce P&L Calculator</title>
+  <title>ecomP&amp;L — E-commerce Profitability Calculator</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="app-wrapper">
 
-    <!-- Clean Minimalist Header -->
-    <header class="app-header">
-      <div class="header-brand">
-        <div class="brand-symbol">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="1" x2="12" y2="23"/>
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+  <div class="layout-container">
+
+    <!-- ================================================================= -->
+    <!-- SIDEBAR NAVIGATION (Dark Slate Aesthetic from Reference)          -->
+    <!-- ================================================================= -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-top">
+        <!-- Logo -->
+        <div class="brand-logo" onclick="app.switchView('dashboard')">
+          <span class="logo-text">ecom<strong>P&amp;L</strong></span>
+        </div>
+
+        <!-- Main Navigation Links -->
+        <nav class="sidebar-nav">
+          <button type="button" class="nav-item active" data-view="dashboard" onclick="app.switchView('dashboard')">
+            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+              <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+              <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+              <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+            </svg>
+            <span>Dashboard</span>
+          </button>
+
+          <button type="button" class="nav-item" data-view="calculator" onclick="app.switchView('calculator')">
+            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+              <line x1="8" y1="6" x2="16" y2="6"></line>
+              <line x1="16" y1="14" x2="16" y2="18"></line>
+              <path d="M16 10h.01"></path>
+              <path d="M12 10h.01"></path>
+              <path d="M8 10h.01"></path>
+              <path d="M12 14h.01"></path>
+              <path d="M8 14h.01"></path>
+              <path d="M12 18h.01"></path>
+              <path d="M8 18h.01"></path>
+            </svg>
+            <span>P&amp;L Calculator</span>
+          </button>
+
+          <button type="button" class="nav-item" data-view="cashflow" onclick="app.switchView('cashflow')">
+            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            <span>Cash Flow</span>
+          </button>
+
+          <button type="button" class="nav-item" data-view="records" onclick="app.switchView('records')">
+            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span>Daily Records</span>
+          </button>
+
+          <button type="button" class="nav-item" data-view="products" onclick="app.switchView('products')">
+            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+            <span>Products</span>
+          </button>
+
+          <button type="button" class="nav-item" data-view="expenses" onclick="app.switchView('expenses')">
+            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 6v6l4 2"></path>
+            </svg>
+            <span>Expenses</span>
+          </button>
+
+          <button type="button" class="nav-item" data-view="reports" onclick="app.switchView('reports')">
+            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            <span>Reports</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="sidebar-bottom">
+        <button type="button" class="nav-item" data-view="settings" onclick="app.switchView('settings')">
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
-        </div>
-        <div>
-          <h1 class="brand-title">E-com P&L Calculator</h1>
-          <p class="brand-subtitle">Fast, accurate daily profit calculation</p>
+          <span>Settings</span>
+        </button>
+
+        <div class="sidebar-tagline">
+          <p class="tagline-text">Better numbers.<br>Healthier brands.</p>
         </div>
       </div>
+    </aside>
 
-      <div class="header-actions">
-        <!-- Currency Selector -->
-        <div class="currency-box">
-          <span class="currency-label">Currency:</span>
-          <select id="currencySelect" class="currency-dropdown" aria-label="Select Currency">
-            <option value="PKR|Rs " selected>PKR (Rs)</option>
-            <option value="USD|$">USD ($)</option>
-            <option value="AED|AED ">AED (AED)</option>
-            <option value="SAR|SAR ">SAR (SAR)</option>
-            <option value="INR|₹">INR (₹)</option>
-            <option value="GBP|£">GBP (£)</option>
-            <option value="EUR|€">EUR (€)</option>
-            <option value="CAD|C$">CAD (C$)</option>
-            <option value="AUD|A$">AUD (A$)</option>
-            <option value="MYR|RM ">MYR (RM)</option>
-            <option value="BDT|৳">BDT (৳)</option>
-            <option value="CUSTOM">+ Custom...</option>
-          </select>
+    <!-- Sidebar Backdrop for Mobile -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="app.toggleMobileSidebar(false)"></div>
+
+    <!-- ================================================================= -->
+    <!-- MAIN CONTENT WRAPPER                                              -->
+    <!-- ================================================================= -->
+    <div class="main-wrapper">
+
+      <!-- TOP HEADER (Greeting, Date Pill, Brand Pill, Currency) -->
+      <header class="top-header">
+        <div class="header-left">
+          <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Navigation" onclick="app.toggleMobileSidebar()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div>
+            <h1 class="header-greeting" id="greetingText">Good morning,</h1>
+            <p class="header-sub">Here's how your brand performed today.</p>
+          </div>
         </div>
 
-        <button type="button" id="loadDemoBtn" class="btn btn-secondary btn-sm" title="Fill with realistic sample numbers">
-          Load Sample
-        </button>
-        <button type="button" id="clearFormBtn" class="btn btn-outline btn-sm">
-          Clear
-        </button>
-      </div>
-    </header>
+        <div class="header-right">
+          <!-- Quick Date Display / Filter Pill -->
+          <div class="header-pill date-pill" id="headerDateDisplay">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span id="currentDateLabel">Today</span>
+          </div>
 
-    <!-- Main 2-Column Calculator Grid -->
-    <main class="calculator-grid">
+          <!-- Currency Selector Pill -->
+          <div class="currency-selector-pill">
+            <label for="currencySelect" class="visually-hidden">Select Currency</label>
+            <select id="currencySelect" class="currency-select" aria-label="Currency">
+              <option value="PKR|Rs " selected>PKR (Rs)</option>
+              <option value="USD|$">USD ($)</option>
+              <option value="AED|AED ">AED (AED)</option>
+              <option value="SAR|SAR ">SAR (SAR)</option>
+              <option value="INR|₹">INR (₹)</option>
+              <option value="GBP|£">GBP (£)</option>
+              <option value="EUR|€">EUR (€)</option>
+              <option value="CAD|C$">CAD (C$)</option>
+              <option value="AUD|A$">AUD (A$)</option>
+              <option value="MYR|RM ">MYR (RM)</option>
+              <option value="BDT|৳">BDT (৳)</option>
+              <option value="CUSTOM">+ Custom...</option>
+            </select>
+          </div>
 
-      <!-- LEFT COLUMN: The Simple Input Form -->
-      <section class="card form-card">
-        <div class="card-head">
-          <h2 class="card-title">Daily Numbers</h2>
-          <span class="card-tag">Manual Entry</span>
+          <!-- Brand Profile / Auth Trigger Pill -->
+          <button type="button" class="brand-pill" onclick="app.openAuthModal()">
+            <span class="brand-avatar" id="headerAvatar">A</span>
+            <span class="brand-name-text" id="headerBrandName">Your Brand</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 1: DASHBOARD (Matching Top Main Screen of Reference)       -->
+      <!-- =============================================================== -->
+      <section class="view-panel active" id="view-dashboard">
+
+        <!-- 4 Top KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-title">Total Revenue</span>
+            <div class="kpi-value font-mono" id="dashKpiRevenue">Rs 0</div>
+            <div class="kpi-trend trend-up" id="dashKpiRevenueTrend">
+              <span class="trend-arrow">&uarr;</span> <span id="dashKpiRevenuePct">12.4%</span> <span class="trend-label">vs yesterday</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <span class="kpi-title">Total Profit</span>
+            <div class="kpi-value font-mono text-mint" id="dashKpiProfit">Rs 0</div>
+            <div class="kpi-trend trend-up" id="dashKpiProfitTrend">
+              <span class="trend-arrow">&uarr;</span> <span id="dashKpiProfitPct">18.7%</span> <span class="trend-label">vs yesterday</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <span class="kpi-title">Net Margin</span>
+            <div class="kpi-value font-mono" id="dashKpiMargin">0.0%</div>
+            <div class="kpi-trend trend-up" id="dashKpiMarginTrend">
+              <span class="trend-arrow">&uarr;</span> <span id="dashKpiMarginPct">4.2%</span> <span class="trend-label">vs yesterday</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <span class="kpi-title">Total Orders</span>
+            <div class="kpi-value font-mono" id="dashKpiOrders">0</div>
+            <div class="kpi-trend trend-up" id="dashKpiOrdersTrend">
+              <span class="trend-arrow">&uarr;</span> <span id="dashKpiOrdersPct">15.3%</span> <span class="trend-label">vs yesterday</span>
+            </div>
+          </div>
         </div>
 
-        <form id="pnlForm" class="pnl-inputs-form">
+        <!-- Middle Charts Row: Profit Trend & Expense Breakdown -->
+        <div class="dashboard-charts-grid">
+
+          <!-- Profit Trend Card (Canvas Line Chart) -->
+          <div class="card chart-card">
+            <div class="card-head">
+              <h2 class="card-title">Profit Trend</h2>
+              <div class="chart-time-tabs" id="chartTimeTabs">
+                <button type="button" class="time-tab" data-range="7D" onclick="app.setChartRange('7D')">7D</button>
+                <button type="button" class="time-tab active" data-range="30D" onclick="app.setChartRange('30D')">30D</button>
+                <button type="button" class="time-tab" data-range="3M" onclick="app.setChartRange('3M')">3M</button>
+                <button type="button" class="time-tab" data-range="6M" onclick="app.setChartRange('6M')">6M</button>
+                <button type="button" class="time-tab" data-range="1Y" onclick="app.setChartRange('1Y')">1Y</button>
+              </div>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="profitTrendCanvas" height="220"></canvas>
+            </div>
+          </div>
+
+          <!-- Expense Breakdown Donut Card -->
+          <div class="card donut-card">
+            <div class="card-head">
+              <h2 class="card-title">Expense Breakdown</h2>
+            </div>
+            <div class="donut-content-layout">
+              <div class="donut-chart-wrapper">
+                <canvas id="expenseDonutCanvas" width="190" height="190"></canvas>
+                <div class="donut-center-label">
+                  <span class="donut-center-sub">Total Expenses</span>
+                  <strong class="donut-center-val font-mono" id="donutCenterTotal">Rs 0</strong>
+                </div>
+              </div>
+
+              <div class="donut-legend" id="donutLegendContainer">
+                <div class="legend-row">
+                  <span class="legend-dot" style="background:#1b4d3e;"></span>
+                  <span class="legend-name">Ad Spend</span>
+                  <span class="legend-val font-mono" id="legendAdSpend">0%</span>
+                </div>
+                <div class="legend-row">
+                  <span class="legend-dot" style="background:#d1b48c;"></span>
+                  <span class="legend-name">COGS</span>
+                  <span class="legend-val font-mono" id="legendCogs">0%</span>
+                </div>
+                <div class="legend-row">
+                  <span class="legend-dot" style="background:#b8a89a;"></span>
+                  <span class="legend-name">Courier</span>
+                  <span class="legend-val font-mono" id="legendCourier">0%</span>
+                </div>
+                <div class="legend-row">
+                  <span class="legend-dot" style="background:#8f9499;"></span>
+                  <span class="legend-name">Packaging</span>
+                  <span class="legend-val font-mono" id="legendPackaging">0%</span>
+                </div>
+                <div class="legend-row">
+                  <span class="legend-dot" style="background:#c86d51;"></span>
+                  <span class="legend-name">Returns</span>
+                  <span class="legend-val font-mono" id="legendReturns">0%</span>
+                </div>
+                <div class="legend-row">
+                  <span class="legend-dot" style="background:#374151;"></span>
+                  <span class="legend-name">Other</span>
+                  <span class="legend-val font-mono" id="legendOther">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bottom Dashboard Row: Recent Records & Botanical Action Card -->
+        <div class="dashboard-bottom-grid">
+
+          <!-- Recent Records Table -->
+          <div class="card recent-records-card">
+            <div class="card-head">
+              <h2 class="card-title">Recent Records</h2>
+              <button type="button" class="btn-link" onclick="app.switchView('records')">
+                View all &rarr;
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="reference-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th class="text-right">Revenue</th>
+                    <th class="text-right">Expenses</th>
+                    <th class="text-right">Profit</th>
+                    <th class="text-right">Margin</th>
+                    <th class="text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="dashRecentRecordsBody">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Botanical Leaf Action / Promo Card -->
+          <div class="botanical-promo-card">
+            <div class="botanical-bg-art">
+              <!-- Inline SVG subtle leafy plant motif matching reference photo -->
+              <svg width="220" height="260" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M180 240C180 180 140 130 90 110C40 90 20 50 10 0C40 20 70 50 90 90C120 150 150 200 180 240Z" fill="rgba(27,77,62,0.07)"/>
+                <path d="M200 160C160 140 120 100 110 50C100 20 90 5 80 0C100 30 130 70 160 110C180 130 190 145 200 160Z" fill="rgba(27,77,62,0.05)"/>
+                <path d="M150 240C120 200 80 170 50 150C20 130 10 100 0 70C20 90 50 120 80 150C110 180 130 210 150 240Z" fill="rgba(27,77,62,0.04)"/>
+              </svg>
+            </div>
+            <div class="botanical-content">
+              <h3 class="promo-heading">Track. Analyse.<br>Grow.</h3>
+              <p class="promo-sub">Get complete control over your e-commerce finances.</p>
+              <button type="button" class="btn btn-dark btn-md" onclick="app.switchView('calculator')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Add New Record</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 2: P&L CALCULATOR (Matching Bottom-Left of Reference)      -->
+      <!-- =============================================================== -->
+      <section class="view-panel" id="view-calculator">
+
+        <div class="calculator-view-header">
+          <div>
+            <h2 class="view-title">P&amp;L Calculator</h2>
+            <p class="view-subtitle">Add your numbers and see your real profit.</p>
+          </div>
+          <div class="calculator-view-actions">
+            <button type="button" id="loadDemoBtn" class="btn btn-outline btn-sm">Load Sample</button>
+            <button type="button" id="clearFormBtn" class="btn btn-outline btn-sm">Clear</button>
+          </div>
+        </div>
+
+        <form id="pnlForm" class="pnl-calculator-form">
           <input type="hidden" id="editEntryId" value="">
 
-          <!-- Date & Store Row -->
-          <div class="form-row-2">
-            <div class="field-group">
-              <label for="inputDate" class="field-label">Date</label>
-              <input type="date" id="inputDate" class="input-text" required>
-            </div>
-            <div class="field-group">
-              <label for="inputStore" class="field-label">Store / Channel</label>
-              <input type="text" id="inputStore" class="input-text" placeholder="e.g. Shopify Store, Daraz, TikTok" value="Shopify Store">
-            </div>
-          </div>
+          <!-- Calculator Cards 3-Column / Grid Structure matching Reference -->
+          <div class="calc-cards-grid">
 
-          <!-- Section 1: Sales / Revenue -->
-          <div class="form-block">
-            <div class="block-title">
-              <span class="block-num">1</span>
-              <span>Sales & Orders</span>
-            </div>
+            <!-- Card 1: Sales & Revenue -->
+            <div class="card calc-section-card">
+              <div class="calc-card-head">
+                <h3 class="calc-section-title">Sales &amp; Revenue</h3>
+              </div>
 
-            <div class="form-row-2">
-              <div class="field-group">
-                <label for="grossSales" class="field-label">Total Daily Sales (Gross) <span class="req">*</span></label>
+              <div class="form-group mb-3">
+                <label for="inputDate" class="field-label">Date</label>
+                <input type="date" id="inputDate" class="input-text" required>
+              </div>
+
+              <div class="form-group mb-3">
+                <label for="inputStore" class="field-label">Store / Channel</label>
+                <input type="text" id="inputStore" class="input-text" placeholder="Shopify Store" value="Shopify Store">
+              </div>
+
+              <div class="form-group mb-3">
+                <label for="grossSales" class="field-label">Total Revenue (Gross) <span class="req">*</span></label>
                 <div class="input-currency-wrapper">
                   <span class="currency-prefix">Rs </span>
-                  <input type="number" id="grossSales" class="input-text input-num" step="0.01" min="0" placeholder="0.00" required>
+                  <input type="number" id="grossSales" class="input-text input-num" step="0.01" min="0" placeholder="0" required>
                 </div>
-                <span class="helper-text">Total sales value before deductions</span>
               </div>
 
-              <div class="field-group">
-                <label for="returnsDiscounts" class="field-label">Returns, Cancelled & Discounts</label>
+              <div class="form-group mb-3">
+                <label for="returnsDiscounts" class="field-label">Refunds / RTO &amp; Discounts</label>
                 <div class="input-currency-wrapper">
                   <span class="currency-prefix">Rs </span>
-                  <input type="number" id="returnsDiscounts" class="input-text input-num" step="0.01" min="0" placeholder="0.00">
+                  <input type="number" id="returnsDiscounts" class="input-text input-num" step="0.01" min="0" placeholder="0">
                 </div>
-                <span class="helper-text">Discounts given, returned or cancelled order value</span>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label for="ordersPlaced" class="field-label">Orders Placed</label>
+                  <input type="number" id="ordersPlaced" class="input-text" step="1" min="0" placeholder="e.g. 54">
+                </div>
+                <div class="form-group">
+                  <label for="ordersDelivered" class="field-label">Orders Delivered</label>
+                  <input type="number" id="ordersDelivered" class="input-text" step="1" min="0" placeholder="e.g. 47">
+                </div>
               </div>
             </div>
 
-            <div class="form-row-2 mt-2">
-              <div class="field-group">
-                <label for="ordersPlaced" class="field-label">Orders Placed</label>
-                <input type="number" id="ordersPlaced" class="input-text" step="1" min="0" placeholder="e.g. 45">
+            <!-- Card 2: Cost of Goods Sold (COGS) -->
+            <div class="card calc-section-card">
+              <div class="calc-card-head">
+                <h3 class="calc-section-title">Cost of Goods Sold (COGS)</h3>
               </div>
-              <div class="field-group">
-                <label for="ordersDelivered" class="field-label">Orders Delivered (Optional)</label>
-                <input type="number" id="ordersDelivered" class="input-text" step="1" min="0" placeholder="e.g. 40">
-              </div>
-            </div>
-          </div>
 
-          <!-- Section 2: Product & Delivery Costs -->
-          <div class="form-block">
-            <div class="block-title">
-              <span class="block-num">2</span>
-              <span>Product & Delivery Costs</span>
-            </div>
-
-            <div class="form-row-2">
-              <div class="field-group">
-                <label for="productCogs" class="field-label">Product Cost (COGS) <span class="req">*</span></label>
+              <div class="form-group mb-3">
+                <label for="productCogs" class="field-label">Product Cost <span class="req">*</span></label>
                 <div class="input-currency-wrapper">
                   <span class="currency-prefix">Rs </span>
-                  <input type="number" id="productCogs" class="input-text input-num" step="0.01" min="0" placeholder="0.00" required>
+                  <input type="number" id="productCogs" class="input-text input-num" step="0.01" min="0" placeholder="0" required>
                 </div>
-                <span class="helper-text">Cost of goods sold for today's orders</span>
+                <span class="field-helper">Direct manufacturing or supplier cost</span>
               </div>
 
-              <div class="field-group">
-                <label for="courierCost" class="field-label">Courier / Delivery Cost <span class="req">*</span></label>
+              <div class="form-group mb-3">
+                <label for="packagingCost" class="field-label">Packaging</label>
                 <div class="input-currency-wrapper">
                   <span class="currency-prefix">Rs </span>
-                  <input type="number" id="courierCost" class="input-text input-num" step="0.01" min="0" placeholder="0.00" required>
+                  <input type="number" id="packagingCost" class="input-text input-num" step="0.01" min="0" placeholder="0">
                 </div>
-                <span class="helper-text">Trax, Leopards, TCS, PostEx, etc.</span>
+                <span class="field-helper">Boxes, flyers, tape &amp; bubble wrap</span>
+              </div>
+
+              <div class="calc-card-callout">
+                <span class="callout-icon">&check;</span>
+                <span class="callout-text">Fulfillment cost affects your gross profit margin immediately.</span>
               </div>
             </div>
 
-            <div class="form-row-2 mt-2">
-              <div class="field-group">
-                <label for="packagingCost" class="field-label">Packaging & Boxes</label>
-                <div class="input-currency-wrapper">
-                  <span class="currency-prefix">Rs </span>
-                  <input type="number" id="packagingCost" class="input-text input-num" step="0.01" min="0" placeholder="0.00">
-                </div>
-                <span class="helper-text">Flyers, tape, bubble wrap</span>
+            <!-- Card 3: Marketing & Shipping -->
+            <div class="card calc-section-card">
+              <div class="calc-card-head">
+                <h3 class="calc-section-title">Marketing &amp; Shipping</h3>
               </div>
 
-              <div class="field-group">
-                <label for="returnShippingCost" class="field-label">Return / RTO Delivery Charges</label>
+              <div class="form-group mb-3">
+                <label for="adSpend" class="field-label">Ad Spend <span class="req">*</span></label>
                 <div class="input-currency-wrapper">
                   <span class="currency-prefix">Rs </span>
-                  <input type="number" id="returnShippingCost" class="input-text input-num" step="0.01" min="0" placeholder="0.00">
+                  <input type="number" id="adSpend" class="input-text input-num" step="0.01" min="0" placeholder="0" required>
                 </div>
-                <span class="helper-text">Reverse shipping charges on returned parcels</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Section 3: Ad Spend & Marketing -->
-          <div class="form-block">
-            <div class="block-title">
-              <span class="block-num">3</span>
-              <span>Marketing & Ads</span>
-            </div>
-
-            <div class="form-row-2">
-              <div class="field-group">
-                <label for="adSpend" class="field-label">Total Ad Spend <span class="req">*</span></label>
-                <div class="input-currency-wrapper">
-                  <span class="currency-prefix">Rs </span>
-                  <input type="number" id="adSpend" class="input-text input-num" step="0.01" min="0" placeholder="0.00" required>
-                </div>
-                <span class="helper-text">Meta, TikTok, Google ads combined</span>
+                <span class="field-helper">Meta, TikTok &amp; Google ad spend</span>
               </div>
 
-              <div class="field-group">
-                <label for="agencyInfluencer" class="field-label">Agency / Influencer / Creative</label>
+              <div class="form-group mb-3">
+                <label for="courierCost" class="field-label">Courier / Shipping <span class="req">*</span></label>
                 <div class="input-currency-wrapper">
                   <span class="currency-prefix">Rs </span>
-                  <input type="number" id="agencyInfluencer" class="input-text input-num" step="0.01" min="0" placeholder="0.00">
+                  <input type="number" id="courierCost" class="input-text input-num" step="0.01" min="0" placeholder="0" required>
                 </div>
-                <span class="helper-text">Agency fee, creator payment, UGC cost</span>
+                <span class="field-helper">Forward courier delivery fees</span>
+              </div>
+
+              <div class="form-group mb-3">
+                <label for="agencyInfluencer" class="field-label">Agency / Influencer / UGC</label>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix">Rs </span>
+                  <input type="number" id="agencyInfluencer" class="input-text input-num" step="0.01" min="0" placeholder="0">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="returnShippingCost" class="field-label">Return Delivery Charges</label>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix">Rs </span>
+                  <input type="number" id="returnShippingCost" class="input-text input-num" step="0.01" min="0" placeholder="0">
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Section 4: Other Expenses (Optional) -->
-          <div class="form-block">
-            <div class="block-title">
-              <span class="block-num">4</span>
-              <span>Other Operating Expenses (Optional)</span>
-            </div>
-
-            <div class="form-row-2">
-              <div class="field-group">
-                <label for="otherExpenses" class="field-label">Overheads / Salary / Software</label>
-                <div class="input-currency-wrapper">
-                  <span class="currency-prefix">Rs </span>
-                  <input type="number" id="otherExpenses" class="input-text input-num" step="0.01" min="0" placeholder="0.00">
-                </div>
-                <span class="helper-text">Daily team wages, Shopify fee, tools</span>
+            <!-- Card 4: Other Expenses & Action -->
+            <div class="card calc-section-card">
+              <div class="calc-card-head">
+                <h3 class="calc-section-title">Other Expenses</h3>
               </div>
 
-              <div class="field-group">
+              <div class="form-group mb-3">
+                <label for="otherExpenses" class="field-label">Platform Fees / Wages / Overheads</label>
+                <div class="input-currency-wrapper">
+                  <span class="currency-prefix">Rs </span>
+                  <input type="number" id="otherExpenses" class="input-text input-num" step="0.01" min="0" placeholder="0">
+                </div>
+                <span class="field-helper">Shopify fees, team daily salaries, tools</span>
+              </div>
+
+              <div class="form-group mb-3">
                 <label for="entryNotes" class="field-label">Notes (Optional)</label>
-                <input type="text" id="entryNotes" class="input-text" placeholder="e.g. Scaling Meta ABO, new product launch">
+                <input type="text" id="entryNotes" class="input-text" placeholder="e.g. Scaling broad adset, viral creative">
+              </div>
+
+              <div class="calc-submit-box mt-4">
+                <button type="button" id="cancelEditBtn" class="btn btn-outline btn-sm hidden">Cancel Edit</button>
+                <button type="submit" id="saveRecordBtn" class="btn btn-dark btn-calc-action">
+                  <span id="saveBtnText">Calculate &amp; Save Record</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
               </div>
             </div>
+
           </div>
 
-          <!-- Form Action Buttons -->
-          <div class="form-submit-row">
-            <button type="button" id="cancelEditBtn" class="btn btn-outline btn-sm hidden">Cancel Edit</button>
-            <button type="submit" id="saveRecordBtn" class="btn btn-primary btn-md">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span id="saveBtnText">Save Today's Numbers</span>
+          <!-- Bottom Summary Bar (Matching Reference bottom-left screen) -->
+          <div class="card calc-bottom-summary-card" id="calcLiveSummaryBar">
+            <div class="summary-bar-main">
+
+              <div class="summary-cell highlight-cell">
+                <span class="summary-cell-label" id="profitStatusLabel">Your Profit</span>
+                <div class="summary-cell-val font-mono" id="liveNetProfit">Rs 0</div>
+              </div>
+
+              <div class="summary-cell">
+                <span class="summary-cell-label">Revenue</span>
+                <div class="summary-cell-val font-mono" id="liveNetSales">Rs 0</div>
+                <span class="summary-sub" id="liveGrossSub">Gross: Rs 0</span>
+              </div>
+
+              <div class="summary-cell">
+                <span class="summary-cell-label">Total Expenses</span>
+                <div class="summary-cell-val font-mono" id="liveTotalCosts">Rs 0</div>
+                <span class="summary-sub" id="liveCostsSub">All costs</span>
+              </div>
+
+              <div class="summary-cell">
+                <span class="summary-cell-label">Net Margin</span>
+                <div class="summary-cell-val font-mono text-mint" id="liveProfitMargin">0.0%</div>
+                <span class="summary-sub" id="liveMarginSub">Margin</span>
+              </div>
+
+            </div>
+
+            <!-- Proportional Cost & Profit Breakdown Visual Bar -->
+            <div class="calc-breakdown-bar-area">
+              <div class="breakdown-bar-row">
+                <span class="bar-caption">Expense Distribution:</span>
+                <div class="proportional-bar">
+                  <div id="barCogs" class="bar-seg seg-cogs" title="COGS" style="width:0%;"></div>
+                  <div id="barDelivery" class="bar-seg seg-delivery" title="Courier & Delivery" style="width:0%;"></div>
+                  <div id="barAds" class="bar-seg seg-ads" title="Ads & Marketing" style="width:0%;"></div>
+                  <div id="barOther" class="bar-seg seg-other" title="Other Expenses" style="width:0%;"></div>
+                  <div id="barProfit" class="bar-seg seg-profit" title="Net Profit" style="width:0%;"></div>
+                </div>
+              </div>
+              <div class="calc-secondary-metrics">
+                <span class="metric-pill">ROAS: <strong id="liveRoas" class="font-mono">0.00x</strong></span>
+                <span class="metric-pill">CPA: <strong id="liveCpa" class="font-mono">Rs 0</strong></span>
+                <span class="metric-pill">Delivery: <strong id="liveDeliveryRate" class="font-mono">0.0%</strong></span>
+              </div>
+            </div>
+
+          </div>
+
+        </form>
+
+      </section>
+
+      <!-- =============================================================== -->
+      <!-- VIEW: CASH FLOW MANAGEMENT (Deterministic Liquidity System)     -->
+      <!-- =============================================================== -->
+      <section class="view-panel" id="view-cashflow">
+
+        <div class="cashflow-view-header">
+          <div>
+            <h2 class="view-title">Cash Flow Management</h2>
+            <p class="view-subtitle">Track real liquidity: cash in, cash out, closing balances, runway, and future projections.</p>
+          </div>
+          <div class="cashflow-header-actions">
+            <!-- Period Filter Pills -->
+            <div class="cf-period-pills" id="cfPeriodPills">
+              <button type="button" class="cf-period-btn active" data-period="all" onclick="app.setCashPeriod('all')">All Time</button>
+              <button type="button" class="cf-period-btn" data-period="month" onclick="app.setCashPeriod('month')">This Month</button>
+              <button type="button" class="cf-period-btn" data-period="lastMonth" onclick="app.setCashPeriod('lastMonth')">Last Month</button>
+              <button type="button" class="cf-period-btn" data-period="week" onclick="app.setCashPeriod('week')">This Week</button>
+              <button type="button" class="cf-period-btn" data-period="today" onclick="app.setCashPeriod('today')">Today</button>
+            </div>
+
+            <button type="button" class="btn btn-outline btn-sm" onclick="app.exportCashFlowCsv()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Export CSV</span>
+            </button>
+
+            <button type="button" class="btn btn-dark btn-sm" onclick="app.openCashModal()">
+              + Log Cash Movement
             </button>
           </div>
-        </form>
-      </section>
-
-      <!-- RIGHT COLUMN: Instant Live Result & Financial Summary -->
-      <section class="card summary-card">
-        <div class="card-head">
-          <h2 class="card-title">Live P&L Summary</h2>
-          <span class="live-indicator"><span class="live-dot"></span>Instant Result</span>
         </div>
 
-        <!-- Big Highlight Profit / Loss Badge -->
-        <div class="profit-highlight-card" id="profitHighlightCard">
-          <span class="profit-status-text" id="profitStatusLabel">Calculated Profit</span>
-          <div class="profit-big-val" id="liveNetProfit">Rs 0.00</div>
-          <div class="profit-sub-badge" id="liveProfitMargin">Margin: 0.0%</div>
-        </div>
-
-        <!-- Visual Expense vs Profit Breakdown Bar -->
-        <div class="breakdown-bar-section">
-          <div class="breakdown-bar-header">
-            <span>Where did your sales go?</span>
-            <span id="costsPercentageLabel">0% Costs</span>
-          </div>
-          <div class="stacked-bar-container">
-            <div id="barCogs" class="bar-segment bar-cogs" title="Product COGS" style="width: 0%;"></div>
-            <div id="barDelivery" class="bar-segment bar-delivery" title="Courier & Delivery" style="width: 0%;"></div>
-            <div id="barAds" class="bar-segment bar-ads" title="Ad Spend" style="width: 0%;"></div>
-            <div id="barOther" class="bar-segment bar-other" title="Other Expenses" style="width: 0%;"></div>
-            <div id="barProfit" class="bar-segment bar-profit" title="Net Profit" style="width: 0%;"></div>
-          </div>
-          <div class="bar-legend">
-            <span class="legend-item"><span class="dot dot-cogs"></span> COGS</span>
-            <span class="legend-item"><span class="dot dot-delivery"></span> Courier</span>
-            <span class="legend-item"><span class="dot dot-ads"></span> Ads</span>
-            <span class="legend-item"><span class="dot dot-other"></span> Other</span>
-            <span class="legend-item"><span class="dot dot-profit"></span> Net Profit</span>
-          </div>
-        </div>
-
-        <!-- Key Financial Metrics Grid -->
-        <div class="metrics-grid">
-          <div class="metric-box">
-            <span class="metric-label">Net Sales</span>
-            <strong class="metric-value text-stone" id="liveNetSales">Rs 0.00</strong>
-            <span class="metric-sub" id="liveGrossSub">Gross: Rs 0.00</span>
-          </div>
-
-          <div class="metric-box">
-            <span class="metric-label">Total Costs</span>
-            <strong class="metric-value text-amber" id="liveTotalCosts">Rs 0.00</strong>
-            <span class="metric-sub" id="liveCostsSub">All expenses</span>
-          </div>
-
-          <div class="metric-box">
-            <span class="metric-label">Ad Spend</span>
-            <strong class="metric-value text-coral" id="liveAdSpend">Rs 0.00</strong>
-            <span class="metric-sub" id="liveAdShare">0% of sales</span>
-          </div>
-
-          <div class="metric-box">
-            <span class="metric-label">Blended ROAS</span>
-            <strong class="metric-value text-stone" id="liveRoas">0.00x</strong>
-            <span class="metric-sub">Sales ÷ Ads</span>
-          </div>
-
-          <div class="metric-box">
-            <span class="metric-label">Cost per Order (CPA)</span>
-            <strong class="metric-value text-stone" id="liveCpa">Rs 0.00</strong>
-            <span class="metric-sub">Ad spend ÷ orders</span>
-          </div>
-
-          <div class="metric-box">
-            <span class="metric-label">Delivery Rate</span>
-            <strong class="metric-value text-mint" id="liveDeliveryRate">0.0%</strong>
-            <span class="metric-sub" id="liveDeliveredCount">0 delivered</span>
-          </div>
-        </div>
-
-        <!-- Simple Educational Callout -->
-        <div class="simple-tip-box">
-          <div class="tip-icon">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="16" x2="12" y2="12"/>
-              <line x1="12" y1="8" x2="12.01" y2="8"/>
-            </svg>
-          </div>
-          <div class="tip-body">
-            <strong>How your profit is calculated:</strong>
-            <p>Net Profit = (Gross Sales - Returns) - (Product COGS + Courier + Ads + Overheads). Enter your daily numbers on the left, and check your real profit immediately.</p>
-          </div>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- SAVED HISTORY TABLE SECTION (Simple & Clean) -->
-    <section class="card history-section">
-      <div class="history-head">
-        <div>
-          <h2 class="card-title">Saved Daily Records</h2>
-          <p class="history-subtitle">Track your daily progress over time. Edit or delete anytime.</p>
-        </div>
-        <div class="history-actions">
-          <button type="button" id="exportCsvBtn" class="btn btn-secondary btn-sm">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export to CSV
+        <!-- Quick Test Scenarios Bar for Verification -->
+        <div class="cf-test-bar">
+          <span class="test-bar-label">Verified Test Scenarios:</span>
+          <button type="button" class="btn-scenario" onclick="app.loadCashScenario(1)">
+            <strong>Test 1: Standard Flow</strong> (Rs 250k Open + Rs 400k In - Rs 300k Out = <strong>Rs 350k Closing</strong>)
           </button>
-          <button type="button" id="clearAllHistoryBtn" class="btn btn-outline btn-sm text-red">
-            Reset History
+          <button type="button" class="btn-scenario text-coral" onclick="app.loadCashScenario(2)">
+            <strong>Test 2: Negative Cash Flow</strong> (Rs 200k Open + Rs 100k In - Rs 350k Out = <strong>-Rs 50k Closing</strong>)
           </button>
         </div>
-      </div>
 
-      <div class="table-responsive">
-        <table class="simple-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Store</th>
-              <th class="text-right">Orders</th>
-              <th class="text-right">Net Sales</th>
-              <th class="text-right">Ad Spend</th>
-              <th class="text-right">Product & Courier</th>
-              <th class="text-right">Total Costs</th>
-              <th class="text-right">Net Profit</th>
-              <th class="text-right">Margin</th>
-              <th class="text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody id="historyTableBody">
+        <!-- Current Cash Position - 5 Top Metric KPI Cards -->
+        <div class="cf-kpi-grid">
+          <div class="kpi-card cf-kpi-card">
+            <div class="kpi-card-top">
+              <span class="kpi-title">Opening Cash</span>
+              <button type="button" class="btn-link-xs" onclick="app.openOpeningCashModal()">Edit</button>
+            </div>
+            <div class="kpi-value font-mono" id="cfOpeningCash">Rs 250,000</div>
+            <span class="kpi-sub">Period starting balance</span>
+          </div>
+
+          <div class="kpi-card cf-kpi-card">
+            <span class="kpi-title">Cash In (Inflows)</span>
+            <div class="kpi-value font-mono text-mint" id="cfTotalIn">+Rs 400,000</div>
+            <span class="kpi-sub" id="cfInflowsSub">COD &amp; customer receipts</span>
+          </div>
+
+          <div class="kpi-card cf-kpi-card">
+            <span class="kpi-title">Cash Out (Outflows)</span>
+            <div class="kpi-value font-mono text-coral" id="cfTotalOut">-Rs 300,000</div>
+            <span class="kpi-sub" id="cfOutflowsSub">Inventory, ads &amp; bills paid</span>
+          </div>
+
+          <div class="kpi-card cf-kpi-card">
+            <span class="kpi-title">Net Cash Flow</span>
+            <div class="kpi-value font-mono" id="cfNetCash">+Rs 100,000</div>
+            <span class="kpi-sub">Cash In &minus; Cash Out</span>
+          </div>
+
+          <div class="kpi-card cf-kpi-card highlight-cash-card" id="cfClosingCard">
+            <span class="kpi-title">Closing Cash Balance</span>
+            <div class="kpi-value font-mono" id="cfClosingCash">Rs 350,000</div>
+            <span class="kpi-sub">Opening + Net Cash Flow</span>
+          </div>
+        </div>
+
+        <!-- Cash Runway & Warning System Banner -->
+        <div class="cf-alert-card" id="cfAlertBanner">
+          <div class="cf-alert-main">
+            <div class="cf-alert-status-badge" id="cfStatusBadge">
+              <span class="status-indicator-dot"></span>
+              <strong id="cfStatusTitle">Healthy Liquidity</strong>
+            </div>
+            <p class="cf-alert-desc" id="cfStatusDesc">
+              Your projected cash balance remains comfortably above your minimum buffer.
+            </p>
+          </div>
+          <div class="cf-runway-box">
+            <span class="runway-label">Cash Runway</span>
+            <strong class="runway-val" id="cfRunwayVal">Positive Cash Flow</strong>
+            <span class="runway-sub" id="cfRunwaySub">Generating positive net cash</span>
+          </div>
+          <div class="cf-buffer-box">
+            <label for="cfMinBufferInput" class="buffer-label">Minimum Safety Buffer</label>
+            <div class="buffer-input-wrapper">
+              <span class="currency-prefix-xs">Rs </span>
+              <input type="number" id="cfMinBufferInput" class="input-buffer" value="100000" step="5000">
+            </div>
+          </div>
+        </div>
+
+        <!-- Profit vs Cash Flow & Inventory Anti-Double-Counting Cards -->
+        <div class="cf-comparison-grid mt-4">
+          <!-- Card 1: Profit vs Cash Flow -->
+          <div class="card p-4">
+            <div class="card-head p-0 mb-3">
+              <h3 class="card-title">Profit vs. Cash Flow</h3>
+              <span class="card-tag">Performance vs. Liquidity</span>
+            </div>
+            <div class="profit-vs-cash-row">
+              <div class="pvc-box">
+                <span class="pvc-label">Net Profit (P&amp;L)</span>
+                <div class="pvc-val font-mono" id="cfCompNetProfit">Rs 138,420</div>
+                <span class="pvc-desc">"Did we make money?"</span>
+              </div>
+              <div class="pvc-separator">&ne;</div>
+              <div class="pvc-box">
+                <span class="pvc-label">Net Cash Flow</span>
+                <div class="pvc-val font-mono" id="cfCompNetCash">Rs 100,000</div>
+                <span class="pvc-desc">"How much liquid cash moved?"</span>
+              </div>
+              <div class="pvc-variance">
+                <span class="pvc-label">Timing Variance</span>
+                <div class="pvc-val font-mono" id="cfCompVariance">Rs 38,420</div>
+                <span class="pvc-desc">Settlements &amp; prepayments</span>
+              </div>
+            </div>
+            <div class="cf-educational-callout mt-3">
+              <p>Profit and cash flow can differ because inventory purchases, payment timing, COD settlements and other cash movements do not always occur at the same time as revenue and expenses.</p>
+            </div>
+          </div>
+
+          <!-- Card 2: Inventory & COGS Rule -->
+          <div class="card p-4">
+            <div class="card-head p-0 mb-3">
+              <h3 class="card-title">The Inventory &amp; COGS Rule</h3>
+              <span class="badge-status">Zero Double-Counting</span>
+            </div>
+            <div class="inventory-rule-body">
+              <div class="rule-step">
+                <span class="step-num">1</span>
+                <div>
+                  <strong>When you purchase inventory:</strong>
+                  <p>Recorded as a direct <strong class="text-coral">Cash Outflow</strong> on that day (e.g. &minus;Rs 300,000). Cash leaves your bank immediately.</p>
+                </div>
+              </div>
+              <div class="rule-step mt-3">
+                <span class="step-num">2</span>
+                <div>
+                  <strong>When items are sold later:</strong>
+                  <p>Recorded as <strong class="text-dark">COGS</strong> on your P&amp;L statement to determine profit. <em>Cash Flow does NOT subtract COGS again</em>, preserving true liquidity.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cash Flow Forecast Section (Deterministic Projections) -->
+        <div class="card p-4 mt-4">
+          <div class="card-head p-0 mb-3">
+            <div>
+              <h3 class="card-title">Cash Flow Forecast &amp; Shortage Warning</h3>
+              <p class="view-subtitle">Project your closing cash balance across future horizons using deterministic formulas.</p>
+            </div>
+            <div class="chart-time-tabs" id="cfForecastTabs">
+              <button type="button" class="time-tab" data-horizon="7" onclick="app.setForecastHorizon(7)">7 Days</button>
+              <button type="button" class="time-tab" data-horizon="14" onclick="app.setForecastHorizon(14)">14 Days</button>
+              <button type="button" class="time-tab active" data-horizon="30" onclick="app.setForecastHorizon(30)">30 Days</button>
+              <button type="button" class="time-tab" data-horizon="60" onclick="app.setForecastHorizon(60)">60 Days</button>
+              <button type="button" class="time-tab" data-horizon="90" onclick="app.setForecastHorizon(90)">90 Days</button>
+            </div>
+          </div>
+
+          <div class="forecast-inputs-grid">
+            <div class="form-group">
+              <label for="fcExpectedIn" class="field-label">Expected Cash Inflows</label>
+              <div class="input-currency-wrapper">
+                <span class="currency-prefix">Rs </span>
+                <input type="number" id="fcExpectedIn" class="input-text input-num" value="350000" placeholder="0">
+              </div>
+              <span class="field-helper">Expected COD settlements + online customer payments</span>
+            </div>
+
+            <div class="form-group">
+              <label for="fcExpectedOut" class="field-label">Expected Cash Outflows</label>
+              <div class="input-currency-wrapper">
+                <span class="currency-prefix">Rs </span>
+                <input type="number" id="fcExpectedOut" class="input-text input-num" value="280000" placeholder="0">
+              </div>
+              <span class="field-helper">Planned inventory, ad bills, courier, salaries, rent</span>
+            </div>
+
+            <div class="forecast-result-box" id="fcResultBox">
+              <span class="field-label">Projected Closing Cash</span>
+              <div class="forecast-big-val font-mono" id="fcProjectedCash">Rs 420,000</div>
+              <span class="forecast-badge badge-healthy" id="fcWarningBadge">Comfortably Above Buffer</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cash Flow Charts Row: Trend & In vs Out -->
+        <div class="dashboard-charts-grid mt-4">
+          <div class="card chart-card">
+            <div class="card-head">
+              <h3 class="card-title">Cash Balance Trend</h3>
+              <span class="card-tag">Closing Liquidity Progression</span>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="cashTrendCanvas" height="220"></canvas>
+            </div>
+          </div>
+
+          <div class="card chart-card">
+            <div class="card-head">
+              <h3 class="card-title">Cash In vs. Cash Out</h3>
+              <span class="card-tag">Flow Dynamics</span>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="cashInVsOutCanvas" height="220"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cash Flow Tables Section: Date-Wise Summary & Transactions Ledger -->
+        <div class="card full-table-card mt-4">
+          <div class="card-head">
+            <div class="table-subtabs">
+              <button type="button" class="subtab active" id="tabDailySummaryBtn" onclick="app.switchCashTableTab('daily')">Date-Wise Daily Summary</button>
+              <button type="button" class="subtab" id="tabLedgerBtn" onclick="app.switchCashTableTab('ledger')">Itemized Transactions Ledger</button>
+            </div>
+            <div class="table-head-right">
+              <input type="text" id="cfSearchInput" class="input-text-sm" placeholder="Search category / note..." oninput="app.filterCashTransactions()">
+            </div>
+          </div>
+
+          <!-- Table 1: Date-Wise Summary (Section 8 of prompt) -->
+          <div class="table-responsive" id="cfDailySummaryContainer">
+            <table class="reference-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th class="text-right">Cash In</th>
+                  <th class="text-right">Cash Out</th>
+                  <th class="text-right">Net Cash Flow</th>
+                  <th class="text-right">Closing Cash</th>
+                </tr>
+              </thead>
+              <tbody id="cfDailySummaryBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Table 2: Itemized Transactions Ledger -->
+          <div class="table-responsive hidden" id="cfLedgerContainer">
+            <table class="reference-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th class="text-right">Amount</th>
+                  <th class="text-center">Status</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="cfLedgerBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 3: DAILY RECORDS (Matching Bottom-Center of Reference)     -->
+      <!-- =============================================================== -->
+      <section class="view-panel" id="view-records">
+
+        <div class="records-view-header">
+          <div>
+            <h2 class="view-title">Daily Records</h2>
+            <p class="view-subtitle">View and manage your past records.</p>
+          </div>
+          <div class="records-header-actions">
+            <button type="button" id="exportCsvBtn" class="btn btn-outline btn-sm">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Export CSV</span>
+            </button>
+            <button type="button" id="clearAllHistoryBtn" class="btn btn-outline btn-sm text-coral">
+              Reset
+            </button>
+            <button type="button" class="btn btn-dark btn-sm" onclick="app.switchView('calculator')">
+              + Add Record
+            </button>
+          </div>
+        </div>
+
+        <div class="card full-table-card">
+          <div class="table-responsive">
+            <table class="reference-table records-table">
+              <thead>
+                <tr>
+                  <th>Date &nbsp;&darr;</th>
+                  <th>Store</th>
+                  <th class="text-right">Orders</th>
+                  <th class="text-right">Revenue</th>
+                  <th class="text-right">Expenses</th>
+                  <th class="text-right">Profit</th>
+                  <th class="text-right">Margin</th>
+                  <th class="text-center">Status</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Bar matching reference -->
+          <div class="table-pagination">
+            <span class="pagination-info" id="paginationInfo">Showing records</span>
+            <div class="pagination-controls" id="paginationControls">
+              <button type="button" class="page-btn page-arrow" disabled>&lsaquo;</button>
+              <button type="button" class="page-btn active">1</button>
+              <button type="button" class="page-btn">2</button>
+              <button type="button" class="page-btn">3</button>
+              <button type="button" class="page-btn page-arrow">&rsaquo;</button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 4: PRODUCTS (Matching Bottom-Right of Reference)           -->
+      <!-- =============================================================== -->
+      <section class="view-panel" id="view-products">
+
+        <div class="products-view-header">
+          <div>
+            <h2 class="view-title">Product Profitability</h2>
+            <p class="view-subtitle">See which products bring the most profit.</p>
+          </div>
+          <button type="button" class="btn btn-dark btn-sm" onclick="app.showAddProductModal()">
+            + Add Product
+          </button>
+        </div>
+
+        <div class="card full-table-card">
+          <div class="table-responsive">
+            <table class="reference-table products-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th class="text-right">Revenue</th>
+                  <th class="text-right">COGS</th>
+                  <th class="text-right">Ad Spend</th>
+                  <th class="text-right">Profit</th>
+                  <th class="text-right">Margin</th>
+                </tr>
+              </thead>
+              <tbody id="productsTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+              <tfoot>
+                <tr class="table-total-row">
+                  <td><strong>Total</strong></td>
+                  <td class="text-right font-mono font-bold" id="productsTotalRevenue">Rs 0</td>
+                  <td class="text-right font-mono font-bold" id="productsTotalCogs">Rs 0</td>
+                  <td class="text-right font-mono font-bold" id="productsTotalAds">Rs 0</td>
+                  <td class="text-right font-mono font-bold text-mint" id="productsTotalProfit">Rs 0</td>
+                  <td class="text-right font-mono font-bold" id="productsTotalMargin">0.0%</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 5: EXPENSES (Detailed Cost Breakdown)                      -->
+      <!-- =============================================================== -->
+      <section class="view-panel" id="view-expenses">
+
+        <div class="expenses-view-header">
+          <div>
+            <h2 class="view-title">Expenses Breakdown</h2>
+            <p class="view-subtitle">Analyze operational, marketing and fulfillment costs across all saved records.</p>
+          </div>
+        </div>
+
+        <div class="expenses-summary-grid">
+          <div class="kpi-card">
+            <span class="kpi-title">Total Ad Spend</span>
+            <div class="kpi-value font-mono text-coral" id="expTotalAds">Rs 0</div>
+            <span class="kpi-sub" id="expAdsShare">0% of total expenses</span>
+          </div>
+
+          <div class="kpi-card">
+            <span class="kpi-title">Total Product COGS</span>
+            <div class="kpi-value font-mono" id="expTotalCogs">Rs 0</div>
+            <span class="kpi-sub" id="expCogsShare">0% of total expenses</span>
+          </div>
+
+          <div class="kpi-card">
+            <span class="kpi-title">Total Logistics &amp; Shipping</span>
+            <div class="kpi-value font-mono" id="expTotalDelivery">Rs 0</div>
+            <span class="kpi-sub" id="expDeliveryShare">0% of total expenses</span>
+          </div>
+
+          <div class="kpi-card">
+            <span class="kpi-title">Total Overheads &amp; Others</span>
+            <div class="kpi-value font-mono" id="expTotalOther">Rs 0</div>
+            <span class="kpi-sub" id="expOtherShare">0% of total expenses</span>
+          </div>
+        </div>
+
+        <div class="card mt-4 p-4">
+          <h3 class="card-title mb-3">Cost Category Distribution</h3>
+          <div class="category-bars-list" id="categoryBarsList">
             <!-- Dynamically populated -->
-          </tbody>
-        </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 6: REPORTS (Matching Bottom-Left of Reference)             -->
+      <!-- =============================================================== -->
+      <section class="view-panel" id="view-reports">
+
+        <div class="reports-view-header">
+          <div>
+            <h2 class="view-title">Reports</h2>
+            <p class="view-subtitle">Download and analyse your performance.</p>
+          </div>
+          <div class="reports-header-actions">
+            <select class="report-range-select" id="reportRangeSelect">
+              <option value="30">Last 30 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="all">All time</option>
+            </select>
+            <button type="button" class="btn btn-dark btn-sm" onclick="app.exportCsv()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Download CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="reports-subtabs">
+          <button type="button" class="subtab active">Overview</button>
+          <button type="button" class="subtab" onclick="app.switchView('products')">Product Report</button>
+          <button type="button" class="subtab" onclick="app.switchView('expenses')">Expense Report</button>
+        </div>
+
+        <div class="reports-grid mt-4">
+          <!-- Key Insights -->
+          <div class="card reports-insights-card">
+            <h3 class="card-title mb-4">Key Insights</h3>
+
+            <div class="insight-item mb-4">
+              <span class="insight-label">Total Revenue</span>
+              <div class="insight-value font-mono" id="repTotalRevenue">Rs 0</div>
+              <span class="insight-trend text-mint">&uarr; 12.4% vs previous 30 days</span>
+            </div>
+
+            <div class="insight-item mb-4">
+              <span class="insight-label">Total Profit</span>
+              <div class="insight-value font-mono text-mint" id="repTotalProfit">Rs 0</div>
+              <span class="insight-trend text-mint">&uarr; 18.7% vs previous 30 days</span>
+            </div>
+
+            <div class="insight-item">
+              <span class="insight-label">Net Margin</span>
+              <div class="insight-value font-mono" id="repNetMargin">0.0%</div>
+              <span class="insight-trend text-mint">&uarr; 4.2% vs previous 30 days</span>
+            </div>
+          </div>
+
+          <!-- Monthly Profit Bar Chart -->
+          <div class="card reports-chart-card">
+            <div class="card-head">
+              <h3 class="card-title">Monthly Profit</h3>
+            </div>
+            <div class="bar-chart-container">
+              <canvas id="monthlyProfitCanvas" height="240"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- =============================================================== -->
+      <!-- VIEW 7: SETTINGS (Matching Bottom-Center Settings of Reference) -->
+      <!-- =============================================================== -->
+      <section class="view-panel" id="view-settings">
+
+        <div class="settings-view-header">
+          <div>
+            <h2 class="view-title">Settings</h2>
+            <p class="view-subtitle">Manage your brand and account settings.</p>
+          </div>
+        </div>
+
+        <div class="settings-layout-grid">
+
+          <!-- Brand Information Card -->
+          <div class="card settings-card">
+            <h3 class="settings-section-title">Brand Information</h3>
+
+            <div class="brand-avatar-upload-row">
+              <div class="brand-avatar-lg" id="settingsAvatarLarge">A</div>
+              <div>
+                <strong id="settingsBrandDisplay">Your Brand</strong>
+                <button type="button" class="btn-link" style="display:block; font-size:12px;" onclick="document.getElementById('brandNameInput').focus()">Change Name</button>
+              </div>
+            </div>
+
+            <div class="form-group mb-3">
+              <label for="brandNameInput" class="field-label">Brand Name</label>
+              <input type="text" id="brandNameInput" class="input-text" value="Your Brand">
+            </div>
+
+            <div class="form-group mb-3">
+              <label for="settingsCurrencySelect" class="field-label">Default Currency</label>
+              <select id="settingsCurrencySelect" class="input-text">
+                <option value="PKR|Rs ">PKR (Rs)</option>
+                <option value="USD|$">USD ($)</option>
+                <option value="AED|AED ">AED (AED)</option>
+                <option value="SAR|SAR ">SAR (SAR)</option>
+                <option value="INR|₹">INR (₹)</option>
+                <option value="GBP|£">GBP (£)</option>
+                <option value="EUR|€">EUR (€)</option>
+                <option value="CAD|C$">CAD (C$)</option>
+                <option value="AUD|A$">AUD (A$)</option>
+                <option value="MYR|RM ">MYR (RM)</option>
+                <option value="BDT|৳">BDT (৳)</option>
+              </select>
+            </div>
+
+            <div class="form-group mb-3">
+              <label for="settingsTimezone" class="field-label">Time Zone</label>
+              <select id="settingsTimezone" class="input-text">
+                <option value="Asia/Karachi">(GMT+5:00) Karachi, Islamabad</option>
+                <option value="Asia/Dubai">(GMT+4:00) Dubai, Abu Dhabi</option>
+                <option value="Asia/Riyadh">(GMT+3:00) Riyadh</option>
+                <option value="Asia/Kolkata">(GMT+5:30) Mumbai, New Delhi</option>
+                <option value="UTC">(GMT+0:00) UTC / London</option>
+                <option value="America/New_York">(GMT-5:00) Eastern Time (US)</option>
+              </select>
+            </div>
+
+            <button type="button" id="saveBrandSettingsBtn" class="btn btn-dark btn-sm">Save Brand Info</button>
+          </div>
+
+          <!-- Account & Team Members Card -->
+          <div class="settings-col-right">
+
+            <div class="card settings-card mb-4">
+              <h3 class="settings-section-title">Account</h3>
+
+              <div class="form-group mb-3">
+                <label class="field-label">Email</label>
+                <div class="input-row-inline">
+                  <input type="email" class="input-text" value="you@brand.com" readonly>
+                  <button type="button" class="btn-link" onclick="app.openAuthModal()">Change</button>
+                </div>
+              </div>
+
+              <div class="form-group mb-3">
+                <label class="field-label">Password</label>
+                <div class="input-row-inline">
+                  <input type="password" class="input-text" value="********" readonly>
+                  <button type="button" class="btn-link" onclick="app.openAuthModal()">Change</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Team Members Card -->
+            <div class="card settings-card">
+              <div class="card-head">
+                <h3 class="settings-section-title">Team Members</h3>
+                <button type="button" class="btn btn-dark btn-sm" onclick="app.openAuthModal()">+ Add team member</button>
+              </div>
+
+              <div class="team-list">
+                <div class="team-member-row">
+                  <div class="team-member-avatar">A</div>
+                  <div class="team-member-info">
+                    <strong>Owner</strong>
+                    <span class="text-muted">you@brand.com</span>
+                  </div>
+                  <span class="team-badge">Admin</span>
+                </div>
+              </div>
+
+              <p class="settings-note mt-3">
+                <em>Note: Multi-user logins and team members will connect with your Supabase backend.</em>
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </div> <!-- End Main Wrapper -->
+
+  </div> <!-- End Layout Container -->
+
+  <!-- =================================================================== -->
+  <!-- MOBILE BOTTOM NAVIGATION (Matching Phone Mockup in Reference)       -->
+  <!-- =================================================================== -->
+  <nav class="mobile-bottom-nav">
+    <button type="button" class="mobile-nav-btn active" data-view="dashboard" onclick="app.switchView('dashboard')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+        <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+        <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+        <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+      </svg>
+      <span>Dashboard</span>
+    </button>
+
+    <button type="button" class="mobile-nav-btn" data-view="records" onclick="app.switchView('records')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+      </svg>
+      <span>Records</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" data-view="cashflow" onclick="app.switchView('cashflow')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+      </svg>
+      <span>Cash Flow</span>
+    </button>
+
+    <button type="button" class="mobile-nav-btn add-btn" data-view="calculator" onclick="app.switchView('calculator')">
+      <div class="mobile-add-circle">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
       </div>
-    </section>
+      <span>Add</span>
+    </button>
 
-  </div> <!-- End App Wrapper -->
+    <button type="button" class="mobile-nav-btn" data-view="products" onclick="app.switchView('products')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+      </svg>
+      <span>Products</span>
+    </button>
 
-  <!-- Custom Currency Modal -->
+    <button type="button" class="mobile-nav-btn" data-view="settings" onclick="app.switchView('settings')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <!-- =================================================================== -->
+  <!-- MODAL: AUTH / LOGIN (Matching Right Phone Mockup in Reference)      -->
+  <!-- =================================================================== -->
+  <div id="authModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-dialog auth-dialog">
+      <button type="button" class="modal-close" onclick="app.closeModal('authModal')">&times;</button>
+      
+      <div class="auth-header">
+        <h2 class="auth-title">ecom<strong>P&amp;L</strong></h2>
+        <p class="auth-subtitle">Your e-commerce profitability calculator</p>
+      </div>
+
+      <div class="auth-body">
+        <div class="form-group mb-3">
+          <label for="authEmail" class="field-label">Email address</label>
+          <div class="input-with-icon">
+            <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <input type="email" id="authEmail" class="input-text" placeholder="you@brand.com">
+          </div>
+        </div>
+
+        <div class="form-group mb-3">
+          <label for="authPassword" class="field-label">Password</label>
+          <input type="password" id="authPassword" class="input-text" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
+        </div>
+
+        <button type="button" class="btn btn-dark btn-block mt-3" onclick="app.handleAuthSubmit()">
+          Log in
+        </button>
+
+        <div class="auth-links text-center mt-3">
+          <a href="#" class="auth-link" onclick="event.preventDefault(); alert('Connect your Supabase project URL to activate cloud password reset.');">Forgot password?</a>
+        </div>
+
+        <div class="auth-divider">
+          <span>or</span>
+        </div>
+
+        <button type="button" class="btn btn-outline btn-block" onclick="app.handleAuthSubmit()">
+          Create account
+        </button>
+      </div>
+
+      <div class="auth-footer text-center">
+        <p class="tagline-text">Better numbers. Healthier brands.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL: CUSTOM CURRENCY                                              -->
+  <!-- =================================================================== -->
   <div id="customCurrencyModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
     <div class="modal-dialog">
       <div class="modal-header">
@@ -375,18 +1318,131 @@
         <button type="button" class="modal-close" onclick="app.closeModal('customCurrencyModal')">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="field-group mb-2">
+        <div class="form-group mb-3">
           <label for="customCode" class="field-label">Currency Code</label>
           <input type="text" id="customCode" class="input-text" placeholder="e.g. PKR, MYR, CHF, BRL" maxlength="5">
         </div>
-        <div class="field-group mt-2">
+        <div class="form-group">
           <label for="customSymbol" class="field-label">Currency Symbol / Display Prefix</label>
           <input type="text" id="customSymbol" class="input-text" placeholder="e.g. Rs, RM, kr, R$" maxlength="6">
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline btn-sm" onclick="app.closeModal('customCurrencyModal')">Cancel</button>
-        <button type="button" id="saveCustomCurrencyBtn" class="btn btn-primary btn-sm">Save Currency</button>
+        <button type="button" id="saveCustomCurrencyBtn" class="btn btn-dark btn-sm">Save Currency</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL: LOG CASH MOVEMENT (INFLOW / OUTFLOW)                         -->
+  <!-- =================================================================== -->
+  <div id="cashTransactionModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="cashModalTitle">Log Cash Movement</h3>
+        <button type="button" class="modal-close" onclick="app.closeModal('cashTransactionModal')">&times;</button>
+      </div>
+      <form id="cashTxForm" onsubmit="app.handleCashTxSubmit(event)">
+        <input type="hidden" id="cashTxId" value="">
+        <div class="modal-body">
+
+          <!-- Type Selector: Inflow vs Outflow -->
+          <div class="form-group mb-3">
+            <label class="field-label">Movement Type <span class="req">*</span></label>
+            <div class="cf-type-selector">
+              <label class="type-option">
+                <input type="radio" name="cfType" value="inflow" id="typeInflow" checked onchange="app.updateCashCategoryOptions()">
+                <span class="type-pill pill-inflow">+ Cash In (Inflow)</span>
+              </label>
+              <label class="type-option">
+                <input type="radio" name="cfType" value="outflow" id="typeOutflow" onchange="app.updateCashCategoryOptions()">
+                <span class="type-pill pill-outflow">&minus; Cash Out (Outflow)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-row-2 mb-3">
+            <div class="form-group">
+              <label for="cashTxDate" class="field-label">Date <span class="req">*</span></label>
+              <input type="date" id="cashTxDate" class="input-text" required>
+            </div>
+            <div class="form-group">
+              <label for="cashTxCategory" class="field-label">Category <span class="req">*</span></label>
+              <select id="cashTxCategory" class="input-text" required>
+                <!-- Populated dynamically based on Inflow vs Outflow -->
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group mb-3">
+            <label for="cashTxAmount" class="field-label">Actual Cash Amount <span class="req">*</span></label>
+            <div class="input-currency-wrapper">
+              <span class="currency-prefix">Rs </span>
+              <input type="number" id="cashTxAmount" class="input-text input-num" step="0.01" min="0.01" placeholder="0.00" required>
+            </div>
+            <span class="field-helper">Enter the exact amount of cash settled or paid</span>
+          </div>
+
+          <div class="form-group mb-3">
+            <label for="cashTxDesc" class="field-label">Description / Source</label>
+            <input type="text" id="cashTxDesc" class="input-text" placeholder="e.g. PostEx COD remittance #482, Raw material batch">
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="cashTxStatus" class="field-label">Payment Status</label>
+              <select id="cashTxStatus" class="input-text">
+                <option value="cleared" selected>Cleared / Received</option>
+                <option value="pending">Pending / In Transit</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cashTxNotes" class="field-label">Notes (Optional)</label>
+              <input type="text" id="cashTxNotes" class="input-text" placeholder="Invoice or bank ref">
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline btn-sm" onclick="app.closeModal('cashTransactionModal')">Cancel</button>
+          <button type="submit" id="saveCashTxBtn" class="btn btn-dark btn-sm">Save Transaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL: EDIT OPENING CASH BALANCE                                    -->
+  <!-- =================================================================== -->
+  <div id="openingCashModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Adjust Cash Opening Balance</h3>
+        <button type="button" class="modal-close" onclick="app.closeModal('openingCashModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group mb-3">
+          <label for="inputOpeningCashVal" class="field-label">Opening Cash Balance (Bank + Cash on Hand)</label>
+          <div class="input-currency-wrapper">
+            <span class="currency-prefix">Rs </span>
+            <input type="number" id="inputOpeningCashVal" class="input-text input-num" step="0.01" placeholder="250000">
+          </div>
+          <span class="field-helper">Starting liquid funds available at the beginning of the period.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="inputMinBufferVal" class="field-label">Minimum Safety Cash Buffer</label>
+          <div class="input-currency-wrapper">
+            <span class="currency-prefix">Rs </span>
+            <input type="number" id="inputMinBufferVal" class="input-text input-num" step="1000" placeholder="100000">
+          </div>
+          <span class="field-helper">You will be alerted if projected cash falls below this buffer.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline btn-sm" onclick="app.closeModal('openingCashModal')">Cancel</button>
+        <button type="button" class="btn btn-dark btn-sm" onclick="app.saveOpeningCashSettings()">Update Balance</button>
       </div>
     </div>
   </div>
