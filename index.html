@@ -1512,49 +1512,49 @@
             <input type="text" id="prodNameInput" class="input-text" placeholder="e.g. Silk Cushion Cover" required>
           </div>
 
-          <div class="form-group mb-3">
-            <label for="prodCategorySelect" class="field-label">Category &amp; Icon</label>
-            <select id="prodCategorySelect" class="input-text">
-              <option value="📦 General">📦 General / Household</option>
-              <option value="👕 Apparel">👕 Apparel &amp; Fashion</option>
-              <option value="👟 Footwear">👟 Footwear &amp; Shoes</option>
-              <option value="📱 Electronics">📱 Tech &amp; Gadgets</option>
-              <option value="🧴 Beauty">🧴 Beauty &amp; Personal Care</option>
-              <option value="🏠 Home Decor">🏠 Bedding &amp; Home Decor</option>
-              <option value="⌚ Accessories">⌚ Watches &amp; Jewelry</option>
-              <option value="🎒 Bags">🎒 Bags &amp; Luggage</option>
-              <option value="☕ Food & Beverage">☕ Food &amp; Beverage</option>
-              <option value="🏋️ Fitness">🏋️ Fitness &amp; Sports</option>
-            </select>
-          </div>
-
-          <div class="grid-2-cols mb-3">
+          <div class="form-row-2 mb-3">
+            <div class="form-group">
+              <label for="prodCategorySelect" class="field-label">Category &amp; Icon</label>
+              <select id="prodCategorySelect" class="input-text">
+                <option value="📦 General">📦 General</option>
+                <option value="👕 Apparel">👕 Apparel</option>
+                <option value="👟 Footwear">👟 Footwear</option>
+                <option value="📱 Electronics">📱 Tech &amp; Gadgets</option>
+                <option value="🧴 Beauty">🧴 Beauty &amp; Skincare</option>
+                <option value="🏠 Home Decor">🏠 Bedding &amp; Decor</option>
+                <option value="⌚ Accessories">⌚ Watches &amp; Jewelry</option>
+                <option value="🎒 Bags">🎒 Bags &amp; Luggage</option>
+                <option value="☕ Food & Beverage">☕ Food &amp; Beverage</option>
+                <option value="🏋️ Fitness">🏋️ Fitness &amp; Sports</option>
+              </select>
+            </div>
             <div class="form-group">
               <label for="prodRevenueInput" class="field-label">Daily Revenue <span class="req">*</span></label>
               <div class="input-currency-wrapper">
                 <span class="currency-prefix currency-symbol-label">Rs </span>
                 <input type="number" id="prodRevenueInput" class="input-text input-num" placeholder="100000" step="any" min="0" required oninput="app.updateProdLivePreview()">
               </div>
-              <span class="field-helper">Total daily sales</span>
             </div>
+          </div>
 
+          <div class="form-row-2 mb-3">
             <div class="form-group">
               <label for="prodCogsInput" class="field-label">Product COGS <span class="req">*</span></label>
               <div class="input-currency-wrapper">
                 <span class="currency-prefix currency-symbol-label">Rs </span>
                 <input type="number" id="prodCogsInput" class="input-text input-num" placeholder="35000" step="any" min="0" required oninput="app.updateProdLivePreview()">
               </div>
-              <span class="field-helper">Manufacturing / Sourcing cost</span>
+              <span class="field-helper">Manufacturing / Sourcing</span>
             </div>
-          </div>
 
-          <div class="form-group mb-3">
-            <label for="prodAdsInput" class="field-label">Allocated Ad Spend</label>
-            <div class="input-currency-wrapper">
-              <span class="currency-prefix currency-symbol-label">Rs </span>
-              <input type="number" id="prodAdsInput" class="input-text input-num" placeholder="20000" step="any" min="0" oninput="app.updateProdLivePreview()">
+            <div class="form-group">
+              <label for="prodAdsInput" class="field-label">Allocated Ad Spend</label>
+              <div class="input-currency-wrapper">
+                <span class="currency-prefix currency-symbol-label">Rs </span>
+                <input type="number" id="prodAdsInput" class="input-text input-num" placeholder="20000" step="any" min="0" oninput="app.updateProdLivePreview()">
+              </div>
+              <span class="field-helper">Marketing budget</span>
             </div>
-            <span class="field-helper">Direct marketing budget for this SKU</span>
           </div>
 
           <!-- Live Margin Calculation Preview Card -->
