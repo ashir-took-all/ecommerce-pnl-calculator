@@ -1,7 +1,7 @@
 /* =====================================================================
-   ecomP&L — E-COMMERCE PROFITABILITY CALCULATOR
-   Reference Design System: Dark Charcoal Sidebar • Warm Linen Canvas
-   Pristine White Cards • Editorial Typography • Zero Clutter
+   ecomP&L - E-COMMERCE PROFITABILITY CALCULATOR
+   Reference Design System: Dark Charcoal Sidebar . Warm Linen Canvas
+   Pristine White Cards . Editorial Typography . Zero Clutter
    ===================================================================== */
 
 :root {
@@ -2121,22 +2121,23 @@ img, canvas, svg {
 }
 
 /* =====================================================================
-   GUEST FOMO BANNER & LOCK GATES (Option B Strict Teaser Access)
+   GUEST BANNER & LOCK GATES (Clean, Minimalist, Pastel Aesthetic)
    ===================================================================== */
+.guest-banner,
 .guest-fomo-banner {
-  background: linear-gradient(135deg, #18191c 0%, #252830 100%);
-  color: #ffffff;
-  padding: 0.85rem 1.25rem;
+  background-color: #f7f5ef;
+  border: 1px solid #e7e2d6;
   border-radius: var(--radius-md);
+  padding: 0.75rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
 }
 
+.guest-banner-left,
 .fomo-banner-content {
   display: flex;
   align-items: center;
@@ -2144,15 +2145,16 @@ img, canvas, svg {
   flex-wrap: wrap;
 }
 
+.guest-pill,
 .fomo-pill {
-  background: rgba(34, 197, 94, 0.2);
-  color: #4ade80;
-  border: 1px solid rgba(34, 197, 94, 0.35);
+  background-color: #eaf3ec;
+  color: #245e38;
+  border: 1px solid #d2e7d7;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  padding: 0.22rem 0.65rem;
+  padding: 0.2rem 0.6rem;
   border-radius: var(--radius-full);
   display: inline-flex;
   align-items: center;
@@ -2160,104 +2162,127 @@ img, canvas, svg {
   flex-shrink: 0;
 }
 
+.guest-banner-text,
 .fomo-text {
-  font-size: 0.85rem;
-  color: #d1d5db;
-  line-height: 1.4;
+  font-size: 0.84rem;
+  color: #55585d;
+  line-height: 1.45;
 }
 
+.guest-banner-text strong,
 .fomo-text strong {
-  color: #ffffff;
+  color: #17191c;
+  font-weight: 600;
 }
 
+.guest-banner-link {
+  color: #17191c;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.guest-banner-link:hover {
+  color: #000000;
+}
+
+.guest-banner-btn,
 .fomo-cta-btn {
-  background-color: var(--mint-bright) !important;
-  color: #064e3b !important;
-  font-weight: 700 !important;
+  background-color: #17191c !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
   border: none !important;
   white-space: nowrap;
-  padding: 0.5rem 1.15rem !important;
-  font-size: 0.82rem !important;
+  padding: 0.45rem 1rem !important;
+  font-size: 0.8rem !important;
   border-radius: var(--radius-full) !important;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  transition: background-color 0.15s ease !important;
+  box-shadow: none !important;
+  transform: none !important;
   flex-shrink: 0;
 }
 
+.guest-banner-btn:hover,
 .fomo-cta-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+  background-color: #2c2f34 !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
-/* Nav Lock Badge */
+/* Nav Lock Badge (Minimalist Icon) */
 .nav-lock-tag {
   margin-left: auto;
-  font-size: 0.72rem;
-  padding: 0.12rem 0.45rem;
-  border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.08);
-  color: #facc15;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  color: #8a8d94;
+  opacity: 0.55;
   display: inline-flex;
   align-items: center;
-  gap: 0.2rem;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.15s ease, color 0.15s ease;
+  background: transparent !important;
+  padding: 0 !important;
 }
 
 .nav-item:hover .nav-lock-tag {
-  background: rgba(255, 255, 255, 0.14);
+  opacity: 0.9;
+  color: #ffffff;
+  background: transparent !important;
 }
 
 .mobile-nav-lock {
   position: absolute;
-  top: 2px;
-  right: 18%;
-  font-size: 0.65rem;
+  top: 3px;
+  right: 20%;
+  color: #8a8d94;
+  opacity: 0.6;
+  display: inline-flex;
+  align-items: center;
 }
 
-/* FOMO Locked Modal Dialog */
+/* FOMO Locked Modal Dialog (Minimalist Pastel Styling) */
 .fomo-dialog {
-  max-width: 490px;
+  max-width: 480px;
   text-align: center;
   padding: 2.25rem 2rem;
+  background-color: #ffffff;
+  border: 1px solid #e7e2d6;
 }
 
 .fomo-icon-circle {
-  width: 58px;
-  height: 58px;
-  background: #fef3c7;
-  color: #b45309;
+  width: 50px;
+  height: 50px;
+  background-color: #eaf3ec;
+  color: #245e38;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1.25rem auto;
-  border: 1px solid #fde68a;
+  margin: 0 auto 1.15rem auto;
+  border: 1px solid #d2e7d7;
 }
 
 .fomo-title {
-  font-size: 1.45rem;
-  font-weight: 800;
-  color: var(--text-dark);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #17191c;
   letter-spacing: -0.02em;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.4rem;
   line-height: 1.25;
 }
 
 .fomo-desc {
-  font-size: 0.88rem;
-  color: var(--text-muted);
+  font-size: 0.85rem;
+  color: #63676d;
   line-height: 1.5;
   margin-bottom: 1.25rem;
 }
 
 .fomo-features-list {
   text-align: left;
-  background: #fbf9f4;
-  border: 1px solid #ede8de;
+  background-color: #faf9f5;
+  border: 1px solid #ece7dc;
   border-radius: var(--radius-md);
-  padding: 1rem 1.25rem;
+  padding: 1rem 1.15rem;
   margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -2268,14 +2293,14 @@ img, canvas, svg {
   display: flex;
   align-items: flex-start;
   gap: 0.65rem;
-  font-size: 0.82rem;
-  color: var(--text-body);
+  font-size: 0.81rem;
+  color: #3b3e43;
   line-height: 1.4;
 }
 
 .fomo-check-icon {
-  color: #16a34a;
-  font-weight: 800;
+  color: #245e38;
+  font-weight: 700;
   flex-shrink: 0;
   margin-top: 1px;
 }
@@ -2288,7 +2313,7 @@ img, canvas, svg {
 
 .fomo-security-badge {
   font-size: 0.74rem;
-  color: var(--text-muted);
+  color: #8a8d94;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2855,7 +2880,7 @@ img, canvas, svg {
 }
 
 /* =====================================================================
-   RESPONSIVE DESIGN SYSTEM (Desktop • Tablet • Mobile)
+   RESPONSIVE DESIGN SYSTEM (Desktop . Tablet . Mobile)
    ===================================================================== */
 
 /* --- 1. Large Laptops / Medium Desktops (< 1200px) --- */
