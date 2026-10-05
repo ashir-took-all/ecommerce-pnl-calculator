@@ -176,6 +176,12 @@
             </select>
           </div>
 
+          <!-- Cloud Sync Status Pill -->
+          <button type="button" class="header-pill cloud-sync-pill offline" id="cloudSyncStatusPill" onclick="app.openAuthModal()" title="Supabase Cloud Sync Status">
+            <span class="sync-dot" id="cloudSyncDot"></span>
+            <span id="cloudSyncLabel">Cloud: Guest</span>
+          </button>
+
           <!-- Brand Profile / Auth Trigger Pill -->
           <button type="button" class="brand-pill" onclick="app.openAuthModal()">
             <span class="brand-avatar" id="headerAvatar">A</span>
@@ -1196,45 +1202,51 @@
           <div class="settings-col-right">
 
             <div class="card settings-card mb-4">
-              <h3 class="settings-section-title">Account</h3>
+              <div class="card-head">
+                <h3 class="settings-section-title">Cloud Account &amp; Sync</h3>
+                <span class="team-badge" id="settingsAccountBadge">Guest Mode</span>
+              </div>
 
               <div class="form-group mb-3">
-                <label class="field-label">Email</label>
+                <label class="field-label">Account Email</label>
                 <div class="input-row-inline">
-                  <input type="email" class="input-text" value="you@brand.com" readonly>
-                  <button type="button" class="btn-link" onclick="app.openAuthModal()">Change</button>
+                  <input type="email" id="settingsAccountEmail" class="input-text" value="guest@offline.local" readonly>
+                  <button type="button" class="btn-link" id="settingsAccountActionBtn" onclick="app.openAuthModal()">Sign In</button>
                 </div>
               </div>
 
               <div class="form-group mb-3">
-                <label class="field-label">Password</label>
-                <div class="input-row-inline">
-                  <input type="password" class="input-text" value="********" readonly>
-                  <button type="button" class="btn-link" onclick="app.openAuthModal()">Change</button>
-                </div>
+                <label class="field-label">Cloud Database</label>
+                <p class="text-muted" style="font-size: 0.8rem; margin-top: 0.25rem;" id="settingsDatabaseStatus">
+                  Supabase Project: <code>rsojtpqbhpfdtkawqree</code> (Row Level Security Active)
+                </p>
               </div>
+
+              <button type="button" class="btn btn-outline btn-sm btn-block" onclick="app.openAuthModal()">
+                Manage Account &amp; Cloud Sync
+              </button>
             </div>
 
             <!-- Team Members Card -->
             <div class="card settings-card">
               <div class="card-head">
-                <h3 class="settings-section-title">Team Members</h3>
-                <button type="button" class="btn btn-dark btn-sm" onclick="app.openAuthModal()">+ Add team member</button>
+                <h3 class="settings-section-title">Active Brand Profile</h3>
+                <button type="button" class="btn btn-dark btn-sm" onclick="app.openAuthModal()">Manage</button>
               </div>
 
               <div class="team-list">
                 <div class="team-member-row">
-                  <div class="team-member-avatar">A</div>
+                  <div class="team-member-avatar" id="settingsTeamAvatar">A</div>
                   <div class="team-member-info">
-                    <strong>Owner</strong>
-                    <span class="text-muted">you@brand.com</span>
+                    <strong id="settingsTeamRole">Brand Owner</strong>
+                    <span class="text-muted" id="settingsTeamEmail">you@brand.com</span>
                   </div>
-                  <span class="team-badge">Admin</span>
+                  <span class="team-badge" id="settingsTeamBadge">Active</span>
                 </div>
               </div>
 
               <p class="settings-note mt-3">
-                <em>Note: Multi-user logins and team members will connect with your Supabase backend.</em>
+                <em>Data is strictly isolated per user account. Sign in to seamlessly sync your records across devices.</em>
               </p>
             </div>
 
@@ -1305,7 +1317,7 @@
   </nav>
 
   <!-- =================================================================== -->
-  <!-- MODAL: AUTH / LOGIN (Matching Right Phone Mockup in Reference)      -->
+  <!-- MODAL: AUTH / CLOUD ACCOUNT (Supabase Multi-Tenant Integration)     -->
   <!-- =================================================================== -->
   <div id="authModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
     <div class="modal-dialog auth-dialog">
@@ -1313,45 +1325,110 @@
       
       <div class="auth-header">
         <h2 class="auth-title">ecom<strong>P&amp;L</strong></h2>
-        <p class="auth-subtitle">Your e-commerce profitability calculator</p>
+        <p class="auth-subtitle" id="authModalSubtitle">Secure Cloud Sync &amp; Multi-Tenant Database</p>
       </div>
 
-      <div class="auth-body">
-        <div class="form-group mb-3">
-          <label for="authEmail" class="field-label">Email address</label>
-          <div class="input-with-icon">
-            <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-              <polyline points="22,6 12,13 2,6"></polyline>
-            </svg>
-            <input type="email" id="authEmail" class="input-text" placeholder="you@brand.com">
+      <!-- VIEW A: LOGGED IN STATE -->
+      <div id="authLoggedInView" class="auth-logged-in-view hidden">
+        <div class="account-card-box mb-3">
+          <div class="account-card-header">
+            <div class="account-avatar-large" id="authAccountAvatar">B</div>
+            <div class="account-info">
+              <h3 class="account-brand-name" id="authAccountBrand">Your Brand</h3>
+              <p class="account-email" id="authAccountEmail">you@brand.com</p>
+            </div>
+          </div>
+          
+          <div class="account-security-badge mt-3">
+            <span class="security-dot"></span>
+            <span>Database Protected by PostgreSQL Row-Level Security</span>
+          </div>
+
+          <div class="account-meta-stats mt-3">
+            <div class="meta-stat-item">
+              <span class="meta-stat-label">Cloud Records</span>
+              <span class="meta-stat-val font-mono" id="authCountRecords">0</span>
+            </div>
+            <div class="meta-stat-item">
+              <span class="meta-stat-label">Products</span>
+              <span class="meta-stat-val font-mono" id="authCountProducts">0</span>
+            </div>
+            <div class="meta-stat-item">
+              <span class="meta-stat-label">Cash Entries</span>
+              <span class="meta-stat-val font-mono" id="authCountCash">0</span>
+            </div>
           </div>
         </div>
 
-        <div class="form-group mb-3">
-          <label for="authPassword" class="field-label">Password</label>
-          <input type="password" id="authPassword" class="input-text" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
+        <div class="account-actions-stack">
+          <button type="button" class="btn btn-outline btn-block mb-2" id="btnSyncCloudNow" onclick="app.syncCloudNow()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+            </svg>
+            <span>Sync Cloud Data Now</span>
+          </button>
+          <button type="button" class="btn btn-dark btn-block" onclick="app.signOutUser()">
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW B: LOGGED OUT / AUTH FORM (Sign In / Register) -->
+      <div id="authLoggedOutView" class="auth-logged-out-view">
+        
+        <!-- Auth Mode Toggle Tabs -->
+        <div class="auth-tabs mb-3">
+          <button type="button" class="auth-tab-btn active" id="authTabSignIn" onclick="app.switchAuthMode('signin')">Sign In</button>
+          <button type="button" class="auth-tab-btn" id="authTabSignUp" onclick="app.switchAuthMode('signup')">Create Brand Account</button>
         </div>
 
-        <button type="button" class="btn btn-dark btn-block mt-3" onclick="app.handleAuthSubmit()">
-          Log in
-        </button>
+        <!-- Alert Banner for errors / messages -->
+        <div id="authAlertBanner" class="auth-alert hidden"></div>
 
-        <div class="auth-links text-center mt-3">
-          <a href="#" class="auth-link" onclick="event.preventDefault(); alert('Connect your Supabase project URL to activate cloud password reset.');">Forgot password?</a>
+        <form id="authForm" onsubmit="app.handleAuthSubmit(event)">
+          <!-- Brand Name Field (Only shown in Sign Up mode) -->
+          <div class="form-group mb-3 hidden" id="authBrandGroup">
+            <label for="authBrandName" class="field-label">Brand / Store Name <span class="req">*</span></label>
+            <input type="text" id="authBrandName" class="input-text" placeholder="e.g. Apex Wear, Silk &amp; Co.">
+          </div>
+
+          <div class="form-group mb-3">
+            <label for="authEmail" class="field-label">Work Email <span class="req">*</span></label>
+            <div class="input-with-icon">
+              <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              <input type="email" id="authEmail" class="input-text" placeholder="owner@brand.com" required autocomplete="email">
+            </div>
+          </div>
+
+          <div class="form-group mb-3">
+            <label for="authPassword" class="field-label">Password <span class="req">*</span></label>
+            <input type="password" id="authPassword" class="input-text" placeholder="At least 6 characters" required autocomplete="current-password" minlength="6">
+          </div>
+
+          <!-- Migration Checkbox (Sign Up Mode) -->
+          <div class="form-group mb-3 hidden" id="authMigrateGroup">
+            <label class="checkbox-label">
+              <input type="checkbox" id="authMigrateLocalData" checked>
+              <span>Upload &amp; save my current browser data into this new cloud account</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-dark btn-block mt-3" id="btnAuthSubmit">
+            <span id="btnAuthSubmitText">Sign In</span>
+          </button>
+        </form>
+
+        <div class="auth-switch-text text-center mt-3" id="authSwitchPrompt">
+          <span id="authSwitchLabel">Don't have an account?</span>
+          <button type="button" class="btn-link" id="authSwitchBtn" onclick="app.toggleAuthMode()">Create Brand Account</button>
         </div>
-
-        <div class="auth-divider">
-          <span>or</span>
-        </div>
-
-        <button type="button" class="btn btn-outline btn-block" onclick="app.handleAuthSubmit()">
-          Create account
-        </button>
       </div>
 
       <div class="auth-footer text-center">
-        <p class="tagline-text">Better numbers. Healthier brands.</p>
+        <p class="tagline-text">Better numbers. Healthier brands. Supabase Cloud Sync.</p>
       </div>
     </div>
   </div>
@@ -1750,6 +1827,8 @@ Silk Cushion Cover, 65000, 20000, 12000" oninput="app.parseBulkInput()"></textar
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
+  <!-- Supabase JS Client (v2) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -15,6 +15,14 @@
   const CASH_TX_KEY = 'simple_cash_flow_v1';
   const CASH_SETTINGS_KEY = 'simple_cash_settings_v1';
 
+  // --- SUPABASE CLOUD SYNC CONFIGURATION ---
+  const SUPABASE_URL = 'https://rsojtpqbhpfdtkawqree.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzb2p0cHFiaHBmZHRrYXdxcmVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExNzQ2MTMsImV4cCI6MjEwNjc1MDYxM30.65znyRPDMwunpTJTBZM7Z-eVc36jHvgLsuFxTR2riDc';
+  let supabaseClient = null;
+  let currentUser = null;
+  let isCloudSyncing = false;
+  let currentAuthMode = 'signin'; // 'signin' | 'signup'
+
   let currency = {
     code: 'PKR',
     symbol: 'Rs '
@@ -419,6 +427,9 @@
     }
 
     saveData();
+    if (currentUser) {
+      syncRecordToCloud(record);
+    }
     refreshAllViews();
     switchView('dashboard');
   }
@@ -467,6 +478,9 @@
     if (confirm(`Delete record for ${rec.date}?`)) {
       records = records.filter((r) => r.id !== id);
       saveData();
+      if (currentUser) {
+        deleteRecordFromCloud(id);
+      }
       refreshAllViews();
       showToast('Record deleted', 'info');
     }
@@ -1184,6 +1198,9 @@
     brand.name = name;
     brand.timezone = tz;
     saveData();
+    if (currentUser) {
+      syncSettingsToCloud();
+    }
 
     document.getElementById('headerBrandName').textContent = name;
     document.getElementById('settingsBrandDisplay').textContent = name;
@@ -1224,13 +1241,615 @@
     if (el) el.classList.add('hidden');
   }
 
+  // =====================================================================
+  // SUPABASE MULTI-TENANT CLOUD SYNC & AUTHENTICATION MODULE
+  // =====================================================================
+
+  function getSupabase() {
+    if (!supabaseClient && window.supabase && window.supabase.createClient) {
+      try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        });
+      } catch (e) {
+        console.error('Failed to init Supabase client', e);
+      }
+    }
+    return supabaseClient;
+  }
+
+  // --- ENTITY SCHEMA MAPPERS (Database Snake_case <-> Frontend CamelCase) ---
+  function recordToDb(rec, userId) {
+    return {
+      id: String(rec.id),
+      user_id: userId,
+      date: rec.date,
+      store: rec.store || 'Shopify Store',
+      gross_sales: Number(rec.grossSales) || 0,
+      returns_discounts: Number(rec.returnsDiscounts) || 0,
+      orders_placed: Number(rec.ordersPlaced) || 0,
+      orders_delivered: Number(rec.ordersDelivered) || 0,
+      product_cogs: Number(rec.productCogs) || 0,
+      courier_cost: Number(rec.courierCost) || 0,
+      packaging_cost: Number(rec.packagingCost) || 0,
+      return_shipping_cost: Number(rec.returnShippingCost) || 0,
+      ad_spend: Number(rec.adSpend) || 0,
+      agency_influencer: Number(rec.agencyInfluencer) || 0,
+      other_expenses: Number(rec.otherExpenses) || 0,
+      net_revenue: Number(rec.netSales) || 0,
+      total_expenses: Number(rec.totalCosts) || 0,
+      net_profit: Number(rec.netProfit) || 0,
+      net_margin: Number(rec.margin) || 0,
+      notes: rec.notes || ''
+    };
+  }
+
+  function dbToRecord(row) {
+    const gross = Number(row.gross_sales) || 0;
+    const ret = Number(row.returns_discounts) || 0;
+    const netRev = Number(row.net_revenue) || (gross - ret);
+    const totalExp = Number(row.total_expenses) || 0;
+    const netProf = Number(row.net_profit) || (netRev - totalExp);
+    const margin = (row.net_margin !== null && row.net_margin !== undefined)
+      ? Number(row.net_margin)
+      : (netRev > 0 ? (netProf / netRev) * 100 : 0);
+    const ads = Number(row.ad_spend) || 0;
+    const orders = Number(row.orders_placed) || 0;
+
+    return {
+      id: row.id,
+      date: row.date,
+      store: row.store || 'Shopify Store',
+      ordersPlaced: orders,
+      ordersDelivered: Number(row.orders_delivered) || 0,
+      grossSales: gross,
+      returnsDiscounts: ret,
+      netSales: netRev,
+      productCogs: Number(row.product_cogs) || 0,
+      courierCost: Number(row.courier_cost) || 0,
+      packagingCost: Number(row.packaging_cost) || 0,
+      returnShippingCost: Number(row.return_shipping_cost) || 0,
+      adSpend: ads,
+      agencyInfluencer: Number(row.agency_influencer) || 0,
+      otherExpenses: Number(row.other_expenses) || 0,
+      totalCosts: totalExp,
+      netProfit: netProf,
+      margin: +margin.toFixed(2),
+      roas: ads > 0 ? +(netRev / ads).toFixed(2) : 0,
+      cpa: (orders > 0 && ads > 0) ? +(ads / orders).toFixed(2) : 0,
+      notes: row.notes || ''
+    };
+  }
+
+  function productToDb(p, userId) {
+    return {
+      id: String(p.id),
+      user_id: userId,
+      name: p.name,
+      category: p.category || 'General',
+      icon: p.icon || '📦',
+      revenue: Number(p.revenue) || 0,
+      cogs: Number(p.cogs) || 0,
+      ads: Number(p.ads) || 0,
+      profit: Number(p.profit) || 0,
+      margin: Number(p.margin) || 0
+    };
+  }
+
+  function dbToProduct(row) {
+    return {
+      id: row.id,
+      name: row.name,
+      category: row.category || 'General',
+      icon: row.icon || '📦',
+      revenue: Number(row.revenue) || 0,
+      cogs: Number(row.cogs) || 0,
+      ads: Number(row.ads) || 0,
+      profit: Number(row.profit) || 0,
+      margin: Number(row.margin) || 0
+    };
+  }
+
+  function cashTxToDb(tx, userId) {
+    return {
+      id: String(tx.id),
+      user_id: userId,
+      date: tx.date,
+      type: tx.type,
+      category: tx.category,
+      description: tx.description || '',
+      amount: Number(tx.amount) || 0,
+      payment_status: tx.paymentStatus || 'cleared',
+      notes: tx.notes || ''
+    };
+  }
+
+  function dbToCashTx(row) {
+    return {
+      id: row.id,
+      date: row.date,
+      type: row.type,
+      category: row.category,
+      description: row.description || '',
+      amount: Number(row.amount) || 0,
+      paymentStatus: row.payment_status || 'cleared',
+      notes: row.notes || ''
+    };
+  }
+
+  // --- ASYNC CLOUD SYNC OPERATIONS ---
+  async function syncRecordToCloud(rec) {
+    const sb = getSupabase();
+    if (!sb || !currentUser) return;
+    try {
+      const row = recordToDb(rec, currentUser.id);
+      const { error } = await sb.from('daily_records').upsert(row);
+      if (error) console.error('Cloud sync record error:', error);
+    } catch (err) {
+      console.error('Cloud sync record error:', err);
+    }
+  }
+
+  async function deleteRecordFromCloud(recId) {
+    const sb = getSupabase();
+    if (!sb || !currentUser) return;
+    try {
+      const { error } = await sb.from('daily_records').delete().eq('id', recId);
+      if (error) console.error('Cloud delete record error:', error);
+    } catch (err) {
+      console.error('Cloud delete record error:', err);
+    }
+  }
+
+  async function syncProductToCloud(prod) {
+    const sb = getSupabase();
+    if (!sb || !currentUser) return;
+    try {
+      const row = productToDb(prod, currentUser.id);
+      const { error } = await sb.from('products').upsert(row);
+      if (error) console.error('Cloud sync product error:', error);
+    } catch (err) {
+      console.error('Cloud sync product error:', err);
+    }
+  }
+
+  async function deleteProductFromCloud(prodId) {
+    const sb = getSupabase();
+    if (!sb || !currentUser) return;
+    try {
+      const { error } = await sb.from('products').delete().eq('id', prodId);
+      if (error) console.error('Cloud delete product error:', error);
+    } catch (err) {
+      console.error('Cloud delete product error:', err);
+    }
+  }
+
+  async function syncAllProductsToCloud(allProducts) {
+    const sb = getSupabase();
+    if (!sb || !currentUser) return;
+    try {
+      const rows = allProducts.map(p => productToDb(p, currentUser.id));
+      const { error } = await sb.from('products').upsert(rows);
+      if (error) console.error('Cloud bulk products error:', error);
+    } catch (err) {
+      console.error('Cloud bulk products error:', err);
+    }
+  }
+
+  async function syncCashTxToCloud(tx) {
+    const sb = getSupabase();
+    if (!sb || !currentUser) return;
+    try {
+      const row = cashTxToDb(tx, currentUser.id);
+      const { error } = await sb.from('cash_transactions').upsert(row);
+      if (error) console.error('Cloud sync cash tx error:', error);
+    } catch (err) {
+      console.error('Cloud sync cash tx error:', err);
+    }
+  }
+
+  async function deleteCashTxFromCloud(txId) {
+    const sb = getSupabase();
+    if (!sb || !currentUser) return;
+    try {
+      const { error } = await sb.from('cash_transactions').delete().eq('id', txId);
+      if (error) console.error('Cloud delete cash tx error:', error);
+    } catch (err) {
+      console.error('Cloud delete cash tx error:', err);
+    }
+  }
+
+  async function syncSettingsToCloud() {
+    const sb = getSupabase();
+    if (!sb || !currentUser) return;
+    try {
+      const { error } = await sb.from('profiles').update({
+        brand_name: brand.name,
+        currency_code: currency.code,
+        currency_symbol: currency.symbol,
+        opening_cash: cashSettings.openingCash,
+        min_cash_buffer: cashSettings.minBuffer,
+        forecast_horizon: cashSettings.forecastHorizon,
+        updated_at: new Date().toISOString()
+      }).eq('id', currentUser.id);
+      if (error) console.error('Cloud sync profile error:', error);
+    } catch (err) {
+      console.error('Cloud sync profile error:', err);
+    }
+  }
+
+  // --- LOAD DATA FROM SUPABASE CLOUD (Multi-Tenant RLS Isolated) ---
+  async function loadCloudData(migratingLocalData = false) {
+    const sb = getSupabase();
+    if (!sb || !currentUser) return;
+
+    setCloudSyncStatus('syncing');
+
+    try {
+      // 1. Fetch Brand Profile
+      const { data: profile } = await sb
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .maybeSingle();
+
+      if (profile) {
+        if (profile.brand_name) brand.name = profile.brand_name;
+        if (profile.currency_code && profile.currency_symbol) {
+          currency.code = profile.currency_code;
+          currency.symbol = profile.currency_symbol;
+        }
+        if (profile.opening_cash !== null && profile.opening_cash !== undefined) {
+          cashSettings.openingCash = Number(profile.opening_cash);
+        }
+        if (profile.min_cash_buffer !== null && profile.min_cash_buffer !== undefined) {
+          cashSettings.minBuffer = Number(profile.min_cash_buffer);
+        }
+        if (profile.forecast_horizon) {
+          cashSettings.forecastHorizon = Number(profile.forecast_horizon);
+        }
+      }
+
+      // 2. Fetch User's Daily P&L Records
+      const { data: cloudRecords, error: recErr } = await sb
+        .from('daily_records')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('date', { ascending: false });
+
+      if (recErr) console.warn('Records load error', recErr);
+
+      // 3. Fetch User's Products
+      const { data: cloudProducts, error: prodErr } = await sb
+        .from('products')
+        .select('*')
+        .eq('user_id', currentUser.id);
+
+      if (prodErr) console.warn('Products load error', prodErr);
+
+      // 4. Fetch User's Cash Transactions
+      const { data: cloudCashTx, error: cashErr } = await sb
+        .from('cash_transactions')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('date', { ascending: false });
+
+      if (cashErr) console.warn('Cash load error', cashErr);
+
+      const hasCloudRecords = cloudRecords && cloudRecords.length > 0;
+      const hasCloudProducts = cloudProducts && cloudProducts.length > 0;
+      const hasCloudCash = cloudCashTx && cloudCashTx.length > 0;
+
+      if (migratingLocalData || (!hasCloudRecords && !hasCloudProducts && !hasCloudCash && records.length > 0)) {
+        // Upload local data to new cloud account
+        if (records.length > 0) {
+          const rows = records.map(r => recordToDb(r, currentUser.id));
+          await sb.from('daily_records').upsert(rows);
+        }
+        if (products.length > 0) {
+          const rows = products.map(p => productToDb(p, currentUser.id));
+          await sb.from('products').upsert(rows);
+        }
+        if (cashTransactions.length > 0) {
+          const rows = cashTransactions.map(t => cashTxToDb(t, currentUser.id));
+          await sb.from('cash_transactions').upsert(rows);
+        }
+        await syncSettingsToCloud();
+      } else {
+        // Hydrate from Cloud
+        if (cloudRecords) records = cloudRecords.map(dbToRecord);
+        if (cloudProducts) products = cloudProducts.map(dbToProduct);
+        if (cloudCashTx) cashTransactions = cloudCashTx.map(dbToCashTx);
+      }
+
+      // Save local snapshot
+      saveData();
+      saveCashData();
+
+      setCloudSyncStatus('online');
+      refreshAllViews();
+      updateAuthUI(true);
+    } catch (err) {
+      console.error('Failed to load cloud data', err);
+      setCloudSyncStatus('offline');
+    }
+  }
+
+  // --- CLOUD SYNC UI INDICATORS ---
+  function setCloudSyncStatus(status) {
+    const pill = document.getElementById('cloudSyncStatusPill');
+    const label = document.getElementById('cloudSyncLabel');
+    const dot = document.getElementById('cloudSyncDot');
+    if (!pill || !label) return;
+
+    if (status === 'online') {
+      pill.className = 'header-pill cloud-sync-pill online';
+      label.textContent = `Cloud: ${brand.name || 'Synced'}`;
+      if (dot) dot.className = 'sync-dot online';
+    } else if (status === 'syncing') {
+      pill.className = 'header-pill cloud-sync-pill syncing';
+      label.textContent = 'Syncing...';
+      if (dot) dot.className = 'sync-dot syncing';
+    } else {
+      pill.className = 'header-pill cloud-sync-pill offline';
+      label.textContent = 'Cloud: Guest';
+      if (dot) dot.className = 'sync-dot';
+    }
+  }
+
+  function updateAuthUI(isLoggedIn) {
+    const loggedInView = document.getElementById('authLoggedInView');
+    const loggedOutView = document.getElementById('authLoggedOutView');
+    const subtitle = document.getElementById('authModalSubtitle');
+
+    if (isLoggedIn && currentUser) {
+      if (loggedInView) loggedInView.classList.remove('hidden');
+      if (loggedOutView) loggedOutView.classList.add('hidden');
+      if (subtitle) subtitle.textContent = 'Connected Account & Cloud Backup';
+
+      const brandNameEl = document.getElementById('authAccountBrand');
+      if (brandNameEl) brandNameEl.textContent = brand.name;
+      const emailEl = document.getElementById('authAccountEmail');
+      if (emailEl) emailEl.textContent = currentUser.email || '';
+      const avatarEl = document.getElementById('authAccountAvatar');
+      if (avatarEl) avatarEl.textContent = (brand.name || 'B').charAt(0).toUpperCase();
+
+      const recCount = document.getElementById('authCountRecords');
+      if (recCount) recCount.textContent = records.length;
+      const prodCount = document.getElementById('authCountProducts');
+      if (prodCount) prodCount.textContent = products.length;
+      const cashCount = document.getElementById('authCountCash');
+      if (cashCount) cashCount.textContent = cashTransactions.length;
+
+      // Update settings page
+      const sEmail = document.getElementById('settingsAccountEmail');
+      if (sEmail) sEmail.value = currentUser.email || '';
+      const sBadge = document.getElementById('settingsAccountBadge');
+      if (sBadge) {
+        sBadge.textContent = 'Cloud Connected';
+        sBadge.style.background = '#dcfce7';
+        sBadge.style.color = '#15803d';
+      }
+      const sBtn = document.getElementById('settingsAccountActionBtn');
+      if (sBtn) sBtn.textContent = 'Account';
+      const tEmail = document.getElementById('settingsTeamEmail');
+      if (tEmail) tEmail.textContent = currentUser.email || '';
+      const tAvatar = document.getElementById('settingsTeamAvatar');
+      if (tAvatar) tAvatar.textContent = (brand.name || 'B').charAt(0).toUpperCase();
+
+      setCloudSyncStatus('online');
+    } else {
+      if (loggedInView) loggedInView.classList.add('hidden');
+      if (loggedOutView) loggedOutView.classList.remove('hidden');
+      if (subtitle) subtitle.textContent = 'Secure Cloud Sync & Multi-Tenant Database';
+
+      // Update settings page
+      const sEmail = document.getElementById('settingsAccountEmail');
+      if (sEmail) sEmail.value = 'guest@offline.local';
+      const sBadge = document.getElementById('settingsAccountBadge');
+      if (sBadge) {
+        sBadge.textContent = 'Guest Mode';
+        sBadge.style.background = '';
+        sBadge.style.color = '';
+      }
+      const sBtn = document.getElementById('settingsAccountActionBtn');
+      if (sBtn) sBtn.textContent = 'Sign In';
+
+      setCloudSyncStatus('offline');
+    }
+
+    // Top Header brand name & avatar
+    const hBrand = document.getElementById('headerBrandName');
+    if (hBrand) hBrand.textContent = brand.name;
+    const hAvatar = document.getElementById('headerAvatar');
+    if (hAvatar) hAvatar.textContent = (brand.name || 'B').charAt(0).toUpperCase();
+  }
+
   function openAuthModal() {
+    updateAuthUI(!!currentUser);
     openModal('authModal');
   }
 
-  function handleAuthSubmit() {
+  function switchAuthMode(mode) {
+    currentAuthMode = mode;
+    const tabIn = document.getElementById('authTabSignIn');
+    const tabUp = document.getElementById('authTabSignUp');
+    const brandGroup = document.getElementById('authBrandGroup');
+    const migrateGroup = document.getElementById('authMigrateGroup');
+    const submitText = document.getElementById('btnAuthSubmitText');
+    const switchLabel = document.getElementById('authSwitchLabel');
+    const switchBtn = document.getElementById('authSwitchBtn');
+    const alertBox = document.getElementById('authAlertBanner');
+
+    if (alertBox) alertBox.classList.add('hidden');
+
+    if (mode === 'signup') {
+      if (tabIn) tabIn.classList.remove('active');
+      if (tabUp) tabUp.classList.add('active');
+      if (brandGroup) brandGroup.classList.remove('hidden');
+      if (migrateGroup) migrateGroup.classList.remove('hidden');
+      if (submitText) submitText.textContent = 'Create Brand Account';
+      if (switchLabel) switchLabel.textContent = 'Already have an account?';
+      if (switchBtn) switchBtn.textContent = 'Sign In';
+    } else {
+      if (tabIn) tabIn.classList.add('active');
+      if (tabUp) tabUp.classList.remove('active');
+      if (brandGroup) brandGroup.classList.add('hidden');
+      if (migrateGroup) migrateGroup.classList.add('hidden');
+      if (submitText) submitText.textContent = 'Sign In';
+      if (switchLabel) switchLabel.textContent = "Don't have an account?";
+      if (switchBtn) switchBtn.textContent = 'Create Brand Account';
+    }
+  }
+
+  function toggleAuthMode() {
+    switchAuthMode(currentAuthMode === 'signin' ? 'signup' : 'signin');
+  }
+
+  function showAuthAlert(msg, type = 'error') {
+    const box = document.getElementById('authAlertBanner');
+    if (!box) return;
+    box.className = `auth-alert ${type}`;
+    box.textContent = msg;
+    box.classList.remove('hidden');
+  }
+
+  async function handleAuthSubmit(e) {
+    if (e) e.preventDefault();
+    const emailInput = document.getElementById('authEmail');
+    const passInput = document.getElementById('authPassword');
+    const brandInput = document.getElementById('authBrandName');
+    const migrateCheck = document.getElementById('authMigrateLocalData');
+    const submitBtn = document.getElementById('btnAuthSubmit');
+    const submitText = document.getElementById('btnAuthSubmitText');
+
+    const email = (emailInput?.value || '').trim();
+    const password = (passInput?.value || '').trim();
+    const brandName = (brandInput?.value || '').trim() || 'My Brand';
+    const doMigrate = migrateCheck ? migrateCheck.checked : true;
+
+    if (!email || !password) {
+      showAuthAlert('Please enter both email and password.');
+      return;
+    }
+
+    if (password.length < 6) {
+      showAuthAlert('Password must be at least 6 characters.');
+      return;
+    }
+
+    const sb = getSupabase();
+    if (!sb) {
+      showAuthAlert('Supabase client could not connect. Check internet connection.');
+      return;
+    }
+
+    if (submitBtn) submitBtn.disabled = true;
+    if (submitText) submitText.textContent = currentAuthMode === 'signup' ? 'Creating account...' : 'Signing in...';
+
+    try {
+      if (currentAuthMode === 'signup') {
+        const { data, error } = await sb.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              brand_name: brandName
+            }
+          }
+        });
+
+        if (error) {
+          showAuthAlert(error.message);
+          if (submitBtn) submitBtn.disabled = false;
+          if (submitText) submitText.textContent = 'Create Brand Account';
+          return;
+        }
+
+        currentUser = data.user;
+        brand.name = brandName;
+        showToast('Brand account created successfully!', 'success');
+        await loadCloudData(doMigrate);
+        closeModal('authModal');
+      } else {
+        const { data, error } = await sb.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) {
+          showAuthAlert(error.message);
+          if (submitBtn) submitBtn.disabled = false;
+          if (submitText) submitText.textContent = 'Sign In';
+          return;
+        }
+
+        currentUser = data.user;
+        showToast('Signed in successfully!', 'success');
+        await loadCloudData(false);
+        closeModal('authModal');
+      }
+    } catch (err) {
+      console.error('Auth error', err);
+      showAuthAlert(err.message || 'Authentication error occurred.');
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+      if (submitText) submitText.textContent = currentAuthMode === 'signup' ? 'Create Brand Account' : 'Sign In';
+    }
+  }
+
+  async function signOutUser() {
+    const sb = getSupabase();
+    if (sb) {
+      await sb.auth.signOut();
+    }
+    currentUser = null;
+    updateAuthUI(false);
     closeModal('authModal');
-    showToast('Offline MVP mode active. Multi-user accounts will connect to Supabase!', 'info');
+    showToast('Signed out of cloud account. Switched to Guest mode.', 'info');
+  }
+
+  async function syncCloudNow() {
+    if (!currentUser) {
+      openAuthModal();
+      return;
+    }
+    showToast('Syncing with Supabase cloud...', 'info');
+    await loadCloudData(true);
+    showToast('Cloud sync complete!', 'success');
+  }
+
+  async function initAuth() {
+    const sb = getSupabase();
+    if (!sb) return;
+
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session && session.user) {
+        currentUser = session.user;
+        updateAuthUI(true);
+        await loadCloudData(false);
+      } else {
+        currentUser = null;
+        updateAuthUI(false);
+      }
+
+      sb.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          currentUser = session.user;
+          updateAuthUI(true);
+        } else if (event === 'SIGNED_OUT') {
+          currentUser = null;
+          updateAuthUI(false);
+        }
+      });
+    } catch (e) {
+      console.warn('Auth initialization notice', e);
+    }
   }
 
   // =====================================================================
@@ -1394,6 +2013,10 @@
     }
 
     saveData();
+    if (currentUser) {
+      const savedProd = id ? products.find((p) => p.id === id) : products[products.length - 1];
+      if (savedProd) syncProductToCloud(savedProd);
+    }
     renderProductsView();
     closeModal('productModal');
   }
@@ -1404,6 +2027,9 @@
     if (confirm(`Are you sure you want to delete "${prod.name}"?`)) {
       products = products.filter((p) => p.id !== id);
       saveData();
+      if (currentUser) {
+        deleteProductFromCloud(id);
+      }
       renderProductsView();
       showToast(`Deleted "${prod.name}"`, 'info');
     }
@@ -1679,6 +2305,9 @@
     }
 
     saveData();
+    if (currentUser) {
+      syncAllProductsToCloud(products);
+    }
     renderProductsView();
     closeModal('bulkProductModal');
     showToast(`Successfully ${mode === 'replace' ? 'replaced list with' : 'added'} ${count} products!`, 'success');
@@ -2423,6 +3052,9 @@
     }
 
     saveCashData();
+    if (currentUser) {
+      syncCashTxToCloud(txObj);
+    }
     closeModal('cashTransactionModal');
     updateCashFlowView();
   }
@@ -2438,6 +3070,9 @@
     if (confirm(`Delete ${tx.type} record for ${formatMoney(tx.amount)}?`)) {
       cashTransactions = cashTransactions.filter((t) => t.id !== id);
       saveCashData();
+      if (currentUser) {
+        deleteCashTxFromCloud(id);
+      }
       updateCashFlowView();
       showToast('Transaction deleted', 'info');
     }
@@ -2458,6 +3093,9 @@
     cashSettings.minBuffer = isNaN(buf) ? 100000 : buf;
 
     saveCashData();
+    if (currentUser) {
+      syncSettingsToCloud();
+    }
     closeModal('openingCashModal');
     updateCashFlowView();
     showToast(`Updated opening cash balance to ${formatMoney(cashSettings.openingCash)}`, 'success');
@@ -2582,6 +3220,7 @@
   function init() {
     loadData();
     updateGreeting();
+    initAuth();
 
     // Default input date
     document.getElementById('inputDate').value = formatDate(new Date());
@@ -2707,6 +3346,10 @@
     closeModal,
     openAuthModal,
     handleAuthSubmit,
+    switchAuthMode,
+    toggleAuthMode,
+    signOutUser,
+    syncCloudNow,
     showAddProductModal,
     setChartRange,
     toggleMobileSidebar,
