@@ -47,7 +47,8 @@
 
   let editingId = null;
   let activeChartRange = '30D';
-  let currentView = 'dashboard';
+  let currentView = 'calculator';
+  let pendingGuestRecord = null;
 
   // --- DATA LOADING & PERSISTENCE ---
   function loadData() {
@@ -413,6 +414,13 @@
       cpa: v.cpa,
       notes: notesInput
     };
+
+    // OPTION B: GUEST FOMO GATE (Guests calculate for free, but saving requires creating a free cloud account)
+    if (!currentUser) {
+      pendingGuestRecord = record;
+      triggerAuthGate('save_record');
+      return;
+    }
 
     if (editingId) {
       const idx = records.findIndex((r) => r.id === editingId);
@@ -1081,6 +1089,14 @@
 
   // --- VIEW SWITCHING ---
   function switchView(viewName) {
+    // OPTION B: GUEST FOMO ACCESS GATE
+    // Guests only have access to the P&L Calculator and Settings.
+    // Clicking Dashboard, Cash Flow, Records, Products, Expenses, or Reports triggers the FOMO gate.
+    if (!currentUser && viewName !== 'calculator' && viewName !== 'settings') {
+      triggerAuthGate(viewName);
+      return;
+    }
+
     currentView = viewName;
 
     // Hide all view panels
@@ -1159,6 +1175,11 @@
 
   // --- CSV EXPORTER ---
   function exportCsv() {
+    if (!currentUser) {
+      triggerAuthGate('export_csv');
+      return;
+    }
+
     if (!records || records.length === 0) {
       showToast('No saved records to export', 'error');
       return;
@@ -1570,6 +1591,17 @@
       saveData();
       saveCashData();
 
+      // Check if there was a pending record from guest mode
+      if (pendingGuestRecord) {
+        const rec = pendingGuestRecord;
+        pendingGuestRecord = null;
+        records.unshift(rec);
+        saveData();
+        await syncRecordToCloud(rec);
+        showToast(`Saved your record for ${rec.date} to your cloud account!`, 'success');
+        switchView('dashboard');
+      }
+
       setCloudSyncStatus('online');
       refreshAllViews();
       updateAuthUI(true);
@@ -1667,10 +1699,158 @@
     if (hBrand) hBrand.textContent = brand.name;
     const hAvatar = document.getElementById('headerAvatar');
     if (hAvatar) hAvatar.textContent = (brand.name || 'B').charAt(0).toUpperCase();
+
+    // Toggle guest FOMO banner visibility
+    const fomoBanner = document.getElementById('guestFomoBanner');
+    if (fomoBanner) {
+      if (isLoggedIn && currentUser) {
+        fomoBanner.classList.add('hidden');
+      } else {
+        fomoBanner.classList.remove('hidden');
+      }
+    }
+
+    // Toggle navigation lock badges
+    const lockTags = document.querySelectorAll('[data-lock="true"]');
+    lockTags.forEach((el) => {
+      if (isLoggedIn && currentUser) {
+        el.classList.add('hidden');
+      } else {
+        el.classList.remove('hidden');
+      }
+    });
   }
 
   function openAuthModal() {
     updateAuthUI(!!currentUser);
+    openModal('authModal');
+  }
+
+  // --- GUEST FOMO FEATURE GATES (Option B Configuration) ---
+  const FEATURE_GATES = {
+    dashboard: {
+      title: "Unlock Live Brand Dashboard",
+      desc: "Get 360° visibility over real-time revenue, net margins, customer acquisition costs (CPA), and benchmark trends with your private account.",
+      features: [
+        "Interactive Gross Revenue & Net Profit trend charts",
+        "Cost Breakdown Donut analyzing COGS, Ads & Logistics",
+        "KPI comparisons vs yesterday and past scaling days",
+        "Private database secured with PostgreSQL Row-Level Security"
+      ]
+    },
+    cashflow: {
+      title: "Unlock Cash Flow & Runway Engine",
+      desc: "Stop running out of cash for stock and ads. Track courier COD disbursements, supplier dues, and simulate cash-out runway.",
+      features: [
+        "Live COD Settlement vs Online payments balance",
+        "Accurate Cash Runway counter (detects cash shortages early)",
+        "Safety cash buffer warnings & 7-90 day forward projections",
+        "Deterministic mathematical model (No AI guesswork)"
+      ]
+    },
+    records: {
+      title: "Unlock 365-Day Daily History",
+      desc: "Never lose a day's financial data. Store and inspect encrypted historical performance snapshots across your brand.",
+      features: [
+        "Full daily ledger with one-click editing & recalculation",
+        "Quick date search and multi-day profitability audit",
+        "Automatic cloud sync across desktop and mobile devices",
+        "Export audit-ready CSV reports at any time"
+      ]
+    },
+    products: {
+      title: "Unlock SKU Economics & Bulk Inventory",
+      desc: "Pinpoint your highest-margin winners and cut money-losing SKUs. Import and analyze entire product catalogs in seconds.",
+      features: [
+        "Individual SKU Unit Profitability and margin calculators",
+        "Bulk CSV & Excel copy-paste product catalog import",
+        "Allocated ad spend and sourcing cost tracking per item",
+        "Real-time profit preview before scaling ad spend"
+      ]
+    },
+    expenses: {
+      title: "Unlock Expense Categories & Overheads",
+      desc: "Understand exactly where every single rupee or dollar goes across packaging, couriers, influencers, and agency retainers.",
+      features: [
+        "Fixed vs variable expense category breakdown",
+        "Monthly overhead impact on real take-home net margin",
+        "Direct integration with daily P&L and Cash Flow tracking",
+        "Custom currency support across global e-com markets"
+      ]
+    },
+    reports: {
+      title: "Unlock Executive Reports & Statements",
+      desc: "Generate monthly profit & loss summaries, expense ratios, and share audit-ready financial statements.",
+      features: [
+        "Monthly aggregated Revenue, COGS, Ads, and Net Profit",
+        "Margin health benchmarks for e-commerce brands",
+        "One-click CSV data export for accountants & investors",
+        "Multi-store support across Shopify, WooCommerce & TikTok"
+      ]
+    },
+    save_record: {
+      title: "Save Record to Your Cloud Database",
+      desc: "Your numbers look great! Create your free brand account in 10 seconds to save today's record and start building your financial history.",
+      features: [
+        "Instantly saves the numbers you just calculated",
+        "Stores 365 days of encrypted daily P&L records",
+        "Unlocks the live Dashboard, Cash Flow, and SKU analytics",
+        "100% Free &bull; Zero credit card required"
+      ]
+    },
+    export_csv: {
+      title: "Export Audit-Ready Financial CSVs",
+      desc: "Registered brand accounts can export comprehensive daily records and cash flow reports directly to CSV.",
+      features: [
+        "Detailed financial rows ready for Excel, Sheets, or QuickBooks",
+        "Itemized courier, ad spend, and net margin columns",
+        "Clean, formatted timestamps for easy tax and accountant sharing",
+        "Free instant account creation in under 10 seconds"
+      ]
+    },
+    banner: {
+      title: "Unlock the Full E-Commerce Financial Suite",
+      desc: "Take your brand from guesswork to complete financial clarity with automated P&L, Cash Flow, and SKU economics.",
+      features: [
+        "Cash Flow & Runway System (COD settlements, courier dues)",
+        "Executive Dashboard with real-time revenue & margin charts",
+        "SKU Unit Economics with bulk catalog CSV import",
+        "PostgreSQL cloud database isolated strictly to your account"
+      ]
+    }
+  };
+
+  function triggerAuthGate(featureName) {
+    const config = FEATURE_GATES[featureName] || FEATURE_GATES.banner;
+
+    const titleEl = document.getElementById('fomoModalTitle');
+    const descEl = document.getElementById('fomoModalDesc');
+    const listEl = document.getElementById('fomoModalFeatures');
+
+    if (titleEl) titleEl.textContent = config.title;
+    if (descEl) descEl.textContent = config.desc;
+
+    if (listEl && config.features) {
+      listEl.innerHTML = config.features.map((f) => `
+        <div class="fomo-feature-item">
+          <span class="fomo-check-icon">✓</span>
+          <span>${f}</span>
+        </div>
+      `).join('');
+    }
+
+    openModal('fomoModal');
+  }
+
+  function openSignupFromFomo() {
+    closeModal('fomoModal');
+    switchAuthMode('signup');
+    openModal('authModal');
+  }
+
+  function openSigninFromFomo() {
+    closeModal('fomoModal');
+    switchAuthMode('signin');
     openModal('authModal');
   }
 
@@ -3350,6 +3530,9 @@
     toggleAuthMode,
     signOutUser,
     syncCloudNow,
+    triggerAuthGate,
+    openSignupFromFomo,
+    openSigninFromFomo,
     showAddProductModal,
     setChartRange,
     toggleMobileSidebar,

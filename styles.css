@@ -2121,6 +2121,182 @@ img, canvas, svg {
 }
 
 /* =====================================================================
+   GUEST FOMO BANNER & LOCK GATES (Option B Strict Teaser Access)
+   ===================================================================== */
+.guest-fomo-banner {
+  background: linear-gradient(135deg, #18191c 0%, #252830 100%);
+  color: #ffffff;
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.fomo-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.fomo-pill {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.22rem 0.65rem;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.fomo-text {
+  font-size: 0.85rem;
+  color: #d1d5db;
+  line-height: 1.4;
+}
+
+.fomo-text strong {
+  color: #ffffff;
+}
+
+.fomo-cta-btn {
+  background-color: var(--mint-bright) !important;
+  color: #064e3b !important;
+  font-weight: 700 !important;
+  border: none !important;
+  white-space: nowrap;
+  padding: 0.5rem 1.15rem !important;
+  font-size: 0.82rem !important;
+  border-radius: var(--radius-full) !important;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  flex-shrink: 0;
+}
+
+.fomo-cta-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+}
+
+/* Nav Lock Badge */
+.nav-lock-tag {
+  margin-left: auto;
+  font-size: 0.72rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.08);
+  color: #facc15;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  transition: opacity 0.15s ease;
+}
+
+.nav-item:hover .nav-lock-tag {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.mobile-nav-lock {
+  position: absolute;
+  top: 2px;
+  right: 18%;
+  font-size: 0.65rem;
+}
+
+/* FOMO Locked Modal Dialog */
+.fomo-dialog {
+  max-width: 490px;
+  text-align: center;
+  padding: 2.25rem 2rem;
+}
+
+.fomo-icon-circle {
+  width: 58px;
+  height: 58px;
+  background: #fef3c7;
+  color: #b45309;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem auto;
+  border: 1px solid #fde68a;
+}
+
+.fomo-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.45rem;
+  line-height: 1.25;
+}
+
+.fomo-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+}
+
+.fomo-features-list {
+  text-align: left;
+  background: #fbf9f4;
+  border: 1px solid #ede8de;
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.fomo-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.82rem;
+  color: var(--text-body);
+  line-height: 1.4;
+}
+
+.fomo-check-icon {
+  color: #16a34a;
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.fomo-actions-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.fomo-security-badge {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+}
+
+/* =====================================================================
    TOASTS
    ===================================================================== */
 .toast-container {

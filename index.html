@@ -34,7 +34,7 @@
 
         <!-- Main Navigation Links -->
         <nav class="sidebar-nav">
-          <button type="button" class="nav-item active" data-view="dashboard" onclick="app.switchView('dashboard')">
+          <button type="button" class="nav-item" data-view="dashboard" onclick="app.switchView('dashboard')">
             <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
               <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
@@ -42,9 +42,10 @@
               <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
             </svg>
             <span>Dashboard</span>
+            <span class="nav-lock-tag" data-lock="true">🔒 Pro</span>
           </button>
 
-          <button type="button" class="nav-item" data-view="calculator" onclick="app.switchView('calculator')">
+          <button type="button" class="nav-item active" data-view="calculator" onclick="app.switchView('calculator')">
             <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="4" y="2" width="16" height="20" rx="2"></rect>
               <line x1="8" y1="6" x2="16" y2="6"></line>
@@ -65,6 +66,7 @@
               <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
             </svg>
             <span>Cash Flow</span>
+            <span class="nav-lock-tag" data-lock="true">🔒 Pro</span>
           </button>
 
           <button type="button" class="nav-item" data-view="records" onclick="app.switchView('records')">
@@ -76,6 +78,7 @@
               <polyline points="10 9 9 9 8 9"></polyline>
             </svg>
             <span>Daily Records</span>
+            <span class="nav-lock-tag" data-lock="true">🔒 Pro</span>
           </button>
 
           <button type="button" class="nav-item" data-view="products" onclick="app.switchView('products')">
@@ -85,6 +88,7 @@
               <line x1="12" y1="22.08" x2="12" y2="12"></line>
             </svg>
             <span>Products</span>
+            <span class="nav-lock-tag" data-lock="true">🔒 Pro</span>
           </button>
 
           <button type="button" class="nav-item" data-view="expenses" onclick="app.switchView('expenses')">
@@ -93,6 +97,7 @@
               <path d="M12 6v6l4 2"></path>
             </svg>
             <span>Expenses</span>
+            <span class="nav-lock-tag" data-lock="true">🔒 Pro</span>
           </button>
 
           <button type="button" class="nav-item" data-view="reports" onclick="app.switchView('reports')">
@@ -102,6 +107,7 @@
               <line x1="6" y1="20" x2="6" y2="14"></line>
             </svg>
             <span>Reports</span>
+            <span class="nav-lock-tag" data-lock="true">🔒 Pro</span>
           </button>
         </nav>
       </div>
@@ -193,10 +199,21 @@
         </div>
       </header>
 
+      <!-- GUEST FOMO UPSELL BANNER (Shown for Guests, Hidden When Logged In) -->
+      <div class="guest-fomo-banner" id="guestFomoBanner">
+        <div class="fomo-banner-content">
+          <span class="fomo-pill">⚡ Free Guest Access</span>
+          <span class="fomo-text">You are exploring the <strong>P&amp;L Calculator</strong>. <a href="#" onclick="event.preventDefault(); app.triggerAuthGate('banner');" style="color: var(--mint-bright); text-decoration: underline; font-weight: 600;">Create a Free Brand Account</a> to unlock <strong>Live Dashboard</strong>, <strong>Cash Flow &amp; Runway</strong>, <strong>SKU Economics</strong> &amp; <strong>Cloud History</strong>.</span>
+        </div>
+        <button type="button" class="fomo-cta-btn" onclick="app.triggerAuthGate('banner')">
+          Unlock Full Suite &rarr;
+        </button>
+      </div>
+
       <!-- =============================================================== -->
       <!-- VIEW 1: DASHBOARD (Matching Top Main Screen of Reference)       -->
       <!-- =============================================================== -->
-      <section class="view-panel active" id="view-dashboard">
+      <section class="view-panel" id="view-dashboard">
 
         <!-- 4 Top KPI Cards -->
         <div class="kpi-grid">
@@ -364,7 +381,7 @@
       <!-- =============================================================== -->
       <!-- VIEW 2: P&L CALCULATOR (Matching Bottom-Left of Reference)      -->
       <!-- =============================================================== -->
-      <section class="view-panel" id="view-calculator">
+      <section class="view-panel active" id="view-calculator">
 
         <div class="calculator-view-header">
           <div>
@@ -1264,7 +1281,7 @@
   <!-- MOBILE BOTTOM NAVIGATION (Matching Phone Mockup in Reference)       -->
   <!-- =================================================================== -->
   <nav class="mobile-bottom-nav">
-    <button type="button" class="mobile-nav-btn active" data-view="dashboard" onclick="app.switchView('dashboard')">
+    <button type="button" class="mobile-nav-btn" data-view="dashboard" onclick="app.switchView('dashboard')">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
         <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
@@ -1272,6 +1289,7 @@
         <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
       </svg>
       <span>Dashboard</span>
+      <span class="mobile-nav-lock" data-lock="true">🔒</span>
     </button>
 
     <button type="button" class="mobile-nav-btn" data-view="records" onclick="app.switchView('records')">
@@ -1282,15 +1300,17 @@
         <line x1="16" y1="17" x2="8" y2="17"></line>
       </svg>
       <span>Records</span>
+      <span class="mobile-nav-lock" data-lock="true">🔒</span>
     </button>
     <button type="button" class="mobile-nav-btn" data-view="cashflow" onclick="app.switchView('cashflow')">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
       </svg>
       <span>Cash Flow</span>
+      <span class="mobile-nav-lock" data-lock="true">🔒</span>
     </button>
 
-    <button type="button" class="mobile-nav-btn add-btn" data-view="calculator" onclick="app.switchView('calculator')">
+    <button type="button" class="mobile-nav-btn add-btn active" data-view="calculator" onclick="app.switchView('calculator')">
       <div class="mobile-add-circle">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -1305,6 +1325,7 @@
         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
       </svg>
       <span>Products</span>
+      <span class="mobile-nav-lock" data-lock="true">🔒</span>
     </button>
 
     <button type="button" class="mobile-nav-btn" data-view="settings" onclick="app.switchView('settings')">
@@ -1429,6 +1450,61 @@
 
       <div class="auth-footer text-center">
         <p class="tagline-text">Better numbers. Healthier brands. Supabase Cloud Sync.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL: GUEST FOMO FEATURE UNLOCK GATE                               -->
+  <!-- =================================================================== -->
+  <div id="fomoModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-dialog fomo-dialog">
+      <button type="button" class="modal-close" onclick="app.closeModal('fomoModal')">&times;</button>
+      
+      <div class="fomo-icon-circle" id="fomoModalIcon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      <h3 class="fomo-title" id="fomoModalTitle">Unlock Brand Suite</h3>
+      <p class="fomo-desc" id="fomoModalDesc">
+        Create your free brand account to unlock live revenue analytics, daily P&amp;L history, cash flow tracking, and SKU unit economics.
+      </p>
+
+      <div class="fomo-features-list" id="fomoModalFeatures">
+        <div class="fomo-feature-item">
+          <span class="fomo-check-icon">✓</span>
+          <span><strong>Cash Flow &amp; Runway System:</strong> Monitor COD settlements, ad spend, and supplier disbursements with automated runway alerts.</span>
+        </div>
+        <div class="fomo-feature-item">
+          <span class="fomo-check-icon">✓</span>
+          <span><strong>Private Cloud Database:</strong> 365-day daily records encrypted and scoped only to your account using PostgreSQL RLS.</span>
+        </div>
+        <div class="fomo-feature-item">
+          <span class="fomo-check-icon">✓</span>
+          <span><strong>Product &amp; SKU Economics:</strong> Analyze unit margins and bulk import catalog SKUs via CSV.</span>
+        </div>
+        <div class="fomo-feature-item">
+          <span class="fomo-check-icon">✓</span>
+          <span><strong>Multi-Device Sync:</strong> Seamless access from desktop and mobile without losing your data.</span>
+        </div>
+      </div>
+
+      <div class="fomo-actions-stack">
+        <button type="button" class="btn btn-dark btn-block" onclick="app.openSignupFromFomo()">
+          <span>Create Free Brand Account (10 Sec)</span>
+        </button>
+        <button type="button" class="btn btn-outline btn-block" onclick="app.openSigninFromFomo()">
+          <span>Already have an account? Sign In</span>
+        </button>
+      </div>
+
+      <div class="fomo-security-badge">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <span>100% Free &bull; Encrypted &bull; Instant Setup</span>
       </div>
     </div>
   </div>
